@@ -7,9 +7,101 @@ use at_commands::builder::CommandBuilder;
 use crate::delay::DelayMs;
 use crate::delay::DelayUs;
 
-pub struct Normal;
+enum Mode {
+    Fu1,
+    Fu2,
+    Fu3,
+    Fu4,
+}
 
-pub struct Command;
+pub struct NormalState {
+    mode: Mode,
+}
+
+pub struct CommandState;
+
+pub enum Error {
+    InvalidChannel,
+}
+
+pub enum BaudRate {
+    Bps1200,
+    Bps2400,
+    Bps4800,
+    Bps9600,
+    Bps19200,
+    Bps38400,
+    Bps57600,
+    Bps115200,
+}
+
+impl Default for BaudRate {
+    fn default() -> Self {
+        BaudRate::Bps9600
+    }
+}
+
+pub struct Channel {
+    channel: u8
+}
+
+impl Default for Channel {
+    fn default() -> Self {
+        Channel {
+            channel: 1,
+        }
+    }
+}
+
+impl Channel {
+    fn get_freq_mhz(&self) -> f32 {
+        433.0 + self.channel as f32 * 0.4
+    }
+
+    fn set_channel(&mut self, ch: u8) -> Result<(), Error> {
+        if ch != 0 && ch < 128 {
+            self.channel = ch;
+            Ok(())
+        } else {
+            Err(Error::InvalidChannel)
+        }
+    }
+}
+
+pub struct TransmissionPower {
+    power: u8,
+}
+
+impl Default for TransmissionPower {
+    fn default() -> Self {
+        TransmissionPower {
+            power: 8,
+        }
+    }
+}
+
+impl TransmissionPower {
+    fn get_power_dbm(&self) -> i8 {
+        match self.power {
+            1 => -1,
+            2 => 2,
+            3 => 5,
+            4 => 8,
+            5 => 11,
+            6 => 14,
+            7 => 17,
+            8 => 20,
+            _ => unreachable!()
+        }
+    }
+}
+
+struct Parameters {
+    mode: PhantomData<Mode>,
+    baud_rate: BaudRate,
+    channel: Channel,
+    power: TransmissionPower,
+}
 
 #[derive(Debug, Default)]
 struct Hc12<P, S, D, T> {
@@ -19,7 +111,7 @@ struct Hc12<P, S, D, T> {
     state: PhantomData<T>,
 }
 
-impl<P, S, D> Hc12<P, S, D, Normal>
+impl<P, S, D> Hc12<P, S, D, NormalState>
 where P: OutputPin, D: DelayUs<u16> + DelayMs<u16>, S: Read<char> + Write<char> {
     pub fn new(mut set_pin: P, mut delay: D, mut serial: S) -> Option<Self> {
         set_pin.set_low().ok()?;
@@ -44,7 +136,7 @@ where P: OutputPin, D: DelayUs<u16> + DelayMs<u16>, S: Read<char> + Write<char> 
             set_pin,
             delay,
             serial,
-            state: PhantomData::<Normal>,
+            state: PhantomData::<NormalState>,
         })
     }
 
@@ -104,5 +196,32 @@ mod tests {
         let delay = embedded_hal_mock::delay::MockNoop;
         let set_pin = embedded_hal_mock::pin::Mock::new(&pin_expectations);
         let _ = Hc12::new(set_pin, delay, serial).is_none();
+    }
+
+    #[test]
+    fn test_channel_get_freq_default() {
+        let chan = Channel::default();
+        assert_eq!(433.4f32, chan.get_freq_mhz());
+    }
+
+    #[test]
+    fn test_channel_get_freq_100() {
+        let chan = Channel { channel: 100 };
+        assert_eq!(473.0f32, chan.get_freq_mhz());
+    }
+
+    #[test]
+    fn test_channel_get_freq_21() {
+        let chan = Channel { channel: 21 };
+        assert_eq!(441.4f32, chan.get_freq_mhz());
+    }
+
+    #[test]
+    fn test_channel_invalid_channel() {
+        let mut chan = Channel::default();
+        assert!(chan.set_channel(0).is_err());
+        assert!(chan.set_channel(89).is_ok());
+        assert!(chan.set_channel(128).is_err());
+        assert!(chan.set_channel(200).is_err());
     }
 }
