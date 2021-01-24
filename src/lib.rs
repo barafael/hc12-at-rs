@@ -2,6 +2,7 @@ use core::marker::PhantomData;
 
 use embedded_hal::{blocking::delay, digital::v2::OutputPin};
 use embedded_hal::serial::*;
+use nb::Error;
 use at_commands::builder::CommandBuilder;
 
 use crate::delay::DelayMs;
@@ -20,7 +21,7 @@ pub struct NormalState {
 
 pub struct CommandState;
 
-pub enum Error {
+pub enum ChannelError {
     InvalidChannel,
 }
 
@@ -58,12 +59,12 @@ impl Channel {
         433.0 + self.channel as f32 * 0.4
     }
 
-    fn set_channel(&mut self, ch: u8) -> Result<(), Error> {
+    fn set_channel(&mut self, ch: u8) -> Result<(), ChannelError> {
         if ch != 0 && ch < 128 {
             self.channel = ch;
             Ok(())
         } else {
-            Err(Error::InvalidChannel)
+            Err(ChannelError::InvalidChannel)
         }
     }
 }
@@ -142,6 +143,30 @@ where P: OutputPin, D: DelayUs<u16> + DelayMs<u16>, S: Read<char> + Write<char> 
 
     pub fn release(self) -> (P, D, S) {
         (self.set_pin, self.delay, self.serial)
+    }
+}
+
+impl<P, S, D> Write<char> for Hc12<P, S, D, NormalState>
+where P: OutputPin, D: DelayMs<u16>, S: Write<char>
+{
+    type Error = nb::Error<()>;
+
+    fn flush(&mut self) -> nb::Result<(), Self::Error> {
+        todo!()
+    }
+
+    fn write(&mut self, word: char) -> nb::Result<(), Self::Error> {
+        todo!()
+    }
+}
+
+impl<P, S, D> Read<char> for Hc12<P, S, D, NormalState>
+where P: OutputPin, D: DelayMs<u16>, S: Read<char>
+{
+    type Error = ();
+
+    fn read(&mut self) -> nb::Result<char, Self::Error> {
+        todo!()
     }
 }
 
