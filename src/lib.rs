@@ -2,11 +2,9 @@ use core::marker::PhantomData;
 
 use embedded_hal::{blocking::delay, digital::v2::OutputPin};
 use embedded_hal::serial::*;
-use nb::Error;
 use at_commands::builder::CommandBuilder;
 
 use crate::delay::DelayMs;
-use crate::delay::DelayUs;
 
 enum Mode {
     Fu1,
@@ -20,6 +18,8 @@ pub struct NormalState {
 }
 
 pub struct CommandState;
+
+pub struct SleepState;
 
 pub enum ChannelError {
     InvalidChannel,
@@ -113,7 +113,7 @@ struct Hc12<P, S, D, T> {
 }
 
 impl<P, S, D> Hc12<P, S, D, NormalState>
-where P: OutputPin, D: DelayUs<u16> + DelayMs<u16>, S: Read<char> + Write<char> {
+where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
     pub fn new(mut set_pin: P, mut delay: D, mut serial: S) -> Option<Self> {
         set_pin.set_low().ok()?;
         delay.delay_ms(50);
@@ -143,6 +143,63 @@ where P: OutputPin, D: DelayUs<u16> + DelayMs<u16>, S: Read<char> + Write<char> 
 
     pub fn release(self) -> (P, D, S) {
         (self.set_pin, self.delay, self.serial)
+    }
+
+    pub fn go_to_command_state(mut self) -> Option<Hc12<P, S, D, CommandState>> {
+        self.set_pin.set_low().ok()?;
+        self.delay.delay_ms(50);
+        Some(Hc12 {
+            set_pin: self.set_pin,
+            serial: self.serial,
+            delay: self.delay,
+            state: PhantomData::<CommandState>,
+        })
+    }
+}
+
+impl<P, S, D> Hc12<P, S, D, CommandState>
+where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
+    pub fn get_firmware_version(&mut self) -> &str {
+        "TODO"
+    }
+
+    pub fn go_to_sleep(self) -> Hc12<P, S, D, SleepState> {
+        todo!();
+        Hc12 {
+            set_pin: self.set_pin,
+            serial: self.serial,
+            delay: self.delay,
+            state: PhantomData::<SleepState>,
+        }
+    }
+
+    pub fn set_default_settings(&mut self) {
+        todo!()
+    }
+
+    pub fn go_to_normal_state(mut self) -> Option<Hc12<P, S, D, NormalState>> {
+        self.set_pin.set_high().ok()?;
+        self.delay.delay_ms(12);
+        Some(Hc12 {
+            set_pin: self.set_pin,
+            serial: self.serial,
+            delay: self.delay,
+            state: PhantomData::<NormalState>,
+        })
+    }
+}
+
+impl<P, S, D> Hc12<P, S, D, CommandState>
+where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
+    pub fn wake_up(mut self) -> Option<Hc12<P, S, D, CommandState>> {
+        self.set_pin.set_low().ok()?;
+        self.delay.delay_ms(50);
+        Some(Hc12 {
+            set_pin: self.set_pin,
+            serial: self.serial,
+            delay: self.delay,
+            state: PhantomData::<CommandState>,
+        })
     }
 }
 
