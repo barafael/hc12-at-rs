@@ -1,8 +1,8 @@
 use core::marker::PhantomData;
 
-use embedded_hal::{blocking::delay, digital::v2::OutputPin};
-use embedded_hal::serial::*;
 use at_commands::builder::CommandBuilder;
+use embedded_hal::serial::*;
+use embedded_hal::{blocking::delay, digital::v2::OutputPin};
 
 use crate::delay::DelayMs;
 
@@ -21,8 +21,22 @@ pub struct CommandState;
 
 pub struct SleepState;
 
+pub enum Error {
+    Read,
+    Write,
+    InvalidChannel,
+}
+
 pub enum ChannelError {
     InvalidChannel,
+}
+
+impl From<ChannelError> for Error {
+    fn from(v: ChannelError) -> Self {
+        match v {
+            ChannelError::InvalidChannel => Error::InvalidChannel,
+        }
+    }
 }
 
 pub enum BaudRate {
@@ -43,14 +57,12 @@ impl Default for BaudRate {
 }
 
 pub struct Channel {
-    channel: u8
+    channel: u8,
 }
 
 impl Default for Channel {
     fn default() -> Self {
-        Channel {
-            channel: 1,
-        }
+        Channel { channel: 1 }
     }
 }
 
@@ -75,9 +87,7 @@ pub struct TransmissionPower {
 
 impl Default for TransmissionPower {
     fn default() -> Self {
-        TransmissionPower {
-            power: 8,
-        }
+        TransmissionPower { power: 8 }
     }
 }
 
@@ -92,7 +102,7 @@ impl TransmissionPower {
             6 => 14,
             7 => 17,
             8 => 20,
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 }
@@ -113,7 +123,11 @@ struct Hc12<P, S, D, T> {
 }
 
 impl<P, S, D> Hc12<P, S, D, NormalState>
-where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
+where
+    P: OutputPin,
+    D: DelayMs<u16>,
+    S: Read<char> + Write<char>,
+{
     pub fn new(mut set_pin: P, mut delay: D, mut serial: S) -> Option<Self> {
         set_pin.set_low().ok()?;
         delay.delay_ms(50);
@@ -158,7 +172,11 @@ where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
 }
 
 impl<P, S, D> Hc12<P, S, D, CommandState>
-where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
+where
+    P: OutputPin,
+    D: DelayMs<u16>,
+    S: Read<char> + Write<char>,
+{
     pub fn get_firmware_version(&mut self) -> &str {
         "TODO"
     }
@@ -190,7 +208,11 @@ where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
 }
 
 impl<P, S, D> Hc12<P, S, D, CommandState>
-where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
+where
+    P: OutputPin,
+    D: DelayMs<u16>,
+    S: Read<char> + Write<char>,
+{
     pub fn wake_up(mut self) -> Option<Hc12<P, S, D, CommandState>> {
         self.set_pin.set_low().ok()?;
         self.delay.delay_ms(50);
@@ -204,33 +226,63 @@ where P: OutputPin, D: DelayMs<u16>, S: Read<char> + Write<char> {
 }
 
 impl<P, S, D> Write<char> for Hc12<P, S, D, NormalState>
-where P: OutputPin, D: DelayMs<u16>, S: Write<char>
+where
+    P: OutputPin,
+    D: DelayMs<u16>,
+    S: Write<char>,
 {
-    type Error = nb::Error<()>;
+    type Error = Error;
 
     fn flush(&mut self) -> nb::Result<(), Self::Error> {
-        todo!()
+        match self.serial.flush() {
+            Ok(()) => {
+                return Ok(())
+            },
+            Err(_) => {
+                return Err(nb::Error::Other(Error::Write))
+            }
+        }
     }
 
     fn write(&mut self, word: char) -> nb::Result<(), Self::Error> {
-        todo!()
+        match self.serial.write(word) {
+            Ok(()) => {
+                return Ok(())
+            },
+            Err(_) => {
+                return Err(nb::Error::Other(Error::Write))
+            }
+        }
     }
 }
 
 impl<P, S, D> Read<char> for Hc12<P, S, D, NormalState>
-where P: OutputPin, D: DelayMs<u16>, S: Read<char>
+where
+    P: OutputPin,
+    D: DelayMs<u16>,
+    S: Read<char>,
 {
-    type Error = ();
+    type Error = Error;
 
     fn read(&mut self) -> nb::Result<char, Self::Error> {
-        todo!()
+        match self.serial.read() {
+            Ok(c) => {
+                return Ok(c)
+            }
+            Err(_) => {
+                Err(nb::Error::Other(Error::Read))
+            }
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use embedded_hal_mock::{pin::{self, State}, serial};
+    use embedded_hal_mock::{
+        pin::{self, State},
+        serial,
+    };
 
     #[test]
     fn bare_at_some() {
