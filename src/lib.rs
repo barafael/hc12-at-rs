@@ -126,27 +126,50 @@ impl<P, S, D> Hc12<P, S, D, NormalState>
 where
     P: OutputPin,
     D: DelayMs<u16>,
-    S: Read<char> + Write<char>,
+    S: Read<u8> + Write<u8>,
 {
-    pub fn new(mut set_pin: P, mut delay: D, mut serial: S) -> Option<Self> {
-        set_pin.set_low().ok()?;
-        delay.delay_ms(50);
-        serial.write('A').ok()?;
-        serial.write('T').ok()?;
-        serial.write('\r').ok()?;
-        serial.write('\n').ok()?;
+    fn write_buffer(serial: &mut S, buffer: &[u8]) -> Result<(), Error> {
+        for ch in buffer.iter() {
+            match serial.write(*ch) {
+                Ok(_) => {}
+                Err(_) => {}
+            }
+        }
+        Ok(())
+    }
+
+    fn read_buffer(serial: &mut S, buffer: &mut [u8]) -> Result<(), Error> {
         let mut n = 0;
-        let answer = "Ok\r\n";
-        while n < 4 {
+        while n < buffer.len() {
             if let Ok(ch) = serial.read() {
-                if ch != answer.chars().nth(n).unwrap() {
-                    set_pin.set_high().ok()?;
-                    return None;
-                }
+                buffer[n] = ch;
                 n += 1;
             }
         }
+        Ok(())
+    }
+
+    pub fn new(mut set_pin: P, mut delay: D, mut serial: S) -> Option<Self> {
+        set_pin.set_low().ok()?;
+        delay.delay_ms(50);
+        let mut buffer: [u8; 4] = [0; 4];
+        let command = CommandBuilder::create_execute(&mut buffer, true)
+            .named("")
+            .finish()
+            .unwrap();
+        if Hc12::<P, S, D, NormalState>::write_buffer(&mut serial, command).is_err() {
+            set_pin.set_high().ok()?;
+            return None;
+        }
+        let mut buffer: [u8; 4] = [0; 4];
+        if Hc12::<P, S, D, NormalState>::read_buffer(&mut serial, &mut buffer).is_err() {
+            set_pin.set_high().ok()?;
+            return None;
+        }
         set_pin.set_high().ok()?;
+        if buffer != ['O' as u8, 'k' as u8, '\r' as u8, '\n' as u8] {
+            return None;
+        }
         Some(Hc12 {
             set_pin,
             delay,
@@ -175,7 +198,7 @@ impl<P, S, D> Hc12<P, S, D, CommandState>
 where
     P: OutputPin,
     D: DelayMs<u16>,
-    S: Read<char> + Write<char>,
+    S: Read<u8> + Write<u8>,
 {
     pub fn get_firmware_version(&mut self) -> &str {
         "TODO"
@@ -211,7 +234,7 @@ impl<P, S, D> Hc12<P, S, D, CommandState>
 where
     P: OutputPin,
     D: DelayMs<u16>,
-    S: Read<char> + Write<char>,
+    S: Read<u8> + Write<u8>,
 {
     pub fn wake_up(mut self) -> Option<Hc12<P, S, D, CommandState>> {
         self.set_pin.set_low().ok()?;
@@ -225,53 +248,41 @@ where
     }
 }
 
-impl<P, S, D> Write<char> for Hc12<P, S, D, NormalState>
+impl<P, S, D> Write<u8> for Hc12<P, S, D, NormalState>
 where
     P: OutputPin,
     D: DelayMs<u16>,
-    S: Write<char>,
+    S: Write<u8>,
 {
     type Error = Error;
 
     fn flush(&mut self) -> nb::Result<(), Self::Error> {
         match self.serial.flush() {
-            Ok(()) => {
-                return Ok(())
-            },
-            Err(_) => {
-                return Err(nb::Error::Other(Error::Write))
-            }
+            Ok(()) => return Ok(()),
+            Err(_) => return Err(nb::Error::Other(Error::Write)),
         }
     }
 
-    fn write(&mut self, word: char) -> nb::Result<(), Self::Error> {
+    fn write(&mut self, word: u8) -> nb::Result<(), Self::Error> {
         match self.serial.write(word) {
-            Ok(()) => {
-                return Ok(())
-            },
-            Err(_) => {
-                return Err(nb::Error::Other(Error::Write))
-            }
+            Ok(()) => return Ok(()),
+            Err(_) => return Err(nb::Error::Other(Error::Write)),
         }
     }
 }
 
-impl<P, S, D> Read<char> for Hc12<P, S, D, NormalState>
+impl<P, S, D> Read<u8> for Hc12<P, S, D, NormalState>
 where
     P: OutputPin,
     D: DelayMs<u16>,
-    S: Read<char>,
+    S: Read<u8>,
 {
     type Error = Error;
 
-    fn read(&mut self) -> nb::Result<char, Self::Error> {
+    fn read(&mut self) -> nb::Result<u8, Self::Error> {
         match self.serial.read() {
-            Ok(c) => {
-                return Ok(c)
-            }
-            Err(_) => {
-                Err(nb::Error::Other(Error::Read))
-            }
+            Ok(c) => return Ok(c),
+            Err(_) => Err(nb::Error::Other(Error::Read)),
         }
     }
 }
@@ -287,20 +298,20 @@ mod tests {
     #[test]
     fn bare_at_some() {
         let expectations = [
-            serial::Transaction::write('A'),
-            serial::Transaction::write('T'),
-            serial::Transaction::write('\r'),
-            serial::Transaction::write('\n'),
-            serial::Transaction::read('O'),
-            serial::Transaction::read('k'),
-            serial::Transaction::read('\r'),
-            serial::Transaction::read('\n'),
+            serial::Transaction::write('A' as u8),
+            serial::Transaction::write('T' as u8),
+            serial::Transaction::write('\r' as u8),
+            serial::Transaction::write('\n' as u8),
+            serial::Transaction::read('O' as u8),
+            serial::Transaction::read('k' as u8),
+            serial::Transaction::read('\r' as u8),
+            serial::Transaction::read('\n' as u8),
         ];
         let pin_expectations = [
             pin::Transaction::set(State::Low),
             pin::Transaction::set(State::High),
         ];
-        let serial = serial::Mock::new(&expectations);
+        let serial = serial::Mock::<u8>::new(&expectations);
         let delay = embedded_hal_mock::delay::MockNoop;
         let set_pin = embedded_hal_mock::pin::Mock::new(&pin_expectations);
         let hc12 = Hc12::new(set_pin, delay, serial).unwrap();
@@ -312,15 +323,15 @@ mod tests {
     #[test]
     fn bare_at_none() {
         let expectations = [
-            serial::Transaction::write('A'),
-            serial::Transaction::write('T'),
-            serial::Transaction::write('\r'),
-            serial::Transaction::write('\n'),
-            serial::Transaction::read('B'),
-            serial::Transaction::read('l'),
-            serial::Transaction::read('a'),
-            serial::Transaction::read('\r'),
-            serial::Transaction::read('\n'),
+            serial::Transaction::write('A' as u8),
+            serial::Transaction::write('T' as u8),
+            serial::Transaction::write('\r' as u8),
+            serial::Transaction::write('\n' as u8),
+            serial::Transaction::read('B' as u8),
+            serial::Transaction::read('l' as u8),
+            serial::Transaction::read('a' as u8),
+            serial::Transaction::read('\r' as u8),
+            serial::Transaction::read('\n' as u8),
         ];
         let pin_expectations = [
             pin::Transaction::set(State::Low),
@@ -330,6 +341,40 @@ mod tests {
         let delay = embedded_hal_mock::delay::MockNoop;
         let set_pin = embedded_hal_mock::pin::Mock::new(&pin_expectations);
         let _ = Hc12::new(set_pin, delay, serial).is_none();
+    }
+
+    #[test]
+    fn test_write_normal() {
+        let expectations = [
+            serial::Transaction::write('S' as u8),
+            serial::Transaction::write('o' as u8),
+            serial::Transaction::write('m' as u8),
+            serial::Transaction::write('e' as u8),
+            serial::Transaction::write('D' as u8),
+            serial::Transaction::write('a' as u8),
+            serial::Transaction::write('t' as u8),
+            serial::Transaction::write('a' as u8),
+        ];
+        let serial = serial::Mock::new(&expectations);
+        let delay = embedded_hal_mock::delay::MockNoop;
+        let set_pin = embedded_hal_mock::pin::Mock::new(&[]);
+        let mut hc12 = Hc12 {
+            set_pin,
+            delay,
+            serial,
+            state: PhantomData::<NormalState>,
+        };
+        for ch in b"SomeData".iter() {
+            match hc12.write(*ch) {
+                Ok(_) => {}
+                Err(_) => {
+                    unreachable!();
+                }
+            }
+        }
+        let (mut p, _, mut s) = hc12.release();
+        p.done();
+        s.done();
     }
 
     #[test]
