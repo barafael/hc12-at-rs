@@ -105,6 +105,20 @@ impl TransmissionPower {
             _ => unreachable!(),
         }
     }
+
+    fn get_power_milli_watt(&self) -> f32 {
+        match self.power {
+            1 => 0.79,
+            2 => 1.58,
+            3 => 3.16,
+            4 => 6.31,
+            5 => 12.59,
+            6 => 25.12,
+            7 => 50.12,
+            8 => 100.0,
+            _ => unreachable!(),
+        }
+    }
 }
 
 struct Parameters {
