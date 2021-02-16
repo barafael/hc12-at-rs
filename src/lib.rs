@@ -1,3 +1,5 @@
+#![no_std]
+
 use core::marker::PhantomData;
 
 use at_commands::builder::CommandBuilder;

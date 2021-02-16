@@ -3,8 +3,11 @@ authors = ["Rafael Bachmann <rafael.bachmann.93@gmail.com>"]
 edition = "2018"
 name = "hc12"
 version = "0.1.0"
+
+[dev-dependencies]
+embedded-hal-mock = "0.7.2"
+
 [dependencies]
-at-commands = "*"
-embedded-hal = "*"
-embedded-hal-mock = "*"
-nb = "*"
+at-commands = "0.4.0"
+embedded-hal = "0.2.4"
+nb = "1.0.0"
