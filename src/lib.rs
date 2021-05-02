@@ -3,12 +3,8 @@
 use core::marker::PhantomData;
 
 use at_commands::builder::CommandBuilder;
-use embedded_hal::serial::*;
-use embedded_hal::{blocking::delay, digital::v2::OutputPin};
 
-use crate::delay::DelayMs;
-
-enum Mode {
+pub enum Mode {
     Fu1,
     Fu2,
     Fu3,
@@ -18,17 +14,17 @@ enum Mode {
 pub enum Error {
     Read,
     Write,
-    InvalidChannel,
+    InvalidChannel(u8),
 }
 
 pub enum ChannelError {
-    InvalidChannel,
+    InvalidChannel(u8),
 }
 
 impl From<ChannelError> for Error {
     fn from(v: ChannelError) -> Self {
         match v {
-            ChannelError::InvalidChannel => Error::InvalidChannel,
+            ChannelError::InvalidChannel(ch) => Error::InvalidChannel(ch),
         }
     }
 }
@@ -50,44 +46,40 @@ impl Default for BaudRate {
     }
 }
 
-pub struct Channel {
-    channel: u8,
-}
+pub struct Channel(u8);
 
 impl Default for Channel {
     fn default() -> Self {
-        Channel { channel: 1 }
+        Channel(1)
     }
 }
 
 impl Channel {
-    fn get_freq_mhz(&self) -> f32 {
-        433.0 + self.channel as f32 * 0.4
+    pub fn get_freq_mhz(&self) -> f32 {
+        433.0 + self.0 as f32 * 0.4
     }
 
-    fn set_channel(&mut self, ch: u8) -> Result<(), ChannelError> {
+    pub fn set_channel(&mut self, ch: u8) -> Result<(), ChannelError> {
         if ch != 0 && ch < 128 {
-            self.channel = ch;
+            self.0 = ch;
             Ok(())
         } else {
-            Err(ChannelError::InvalidChannel)
+            Err(ChannelError::InvalidChannel(ch))
         }
     }
 }
 
-pub struct TransmissionPower {
-    power: u8,
-}
+pub struct TransmissionPower(u8);
 
 impl Default for TransmissionPower {
     fn default() -> Self {
-        TransmissionPower { power: 8 }
+        Self(8)
     }
 }
 
 impl TransmissionPower {
-    fn get_power_dbm(&self) -> i8 {
-        match self.power {
+    pub fn get_power_dbm(&self) -> i8 {
+        match self.0 {
             1 => -1,
             2 => 2,
             3 => 5,
@@ -100,8 +92,8 @@ impl TransmissionPower {
         }
     }
 
-    fn get_power_milliwatt(&self) -> f32 {
-        match self.power {
+    pub fn get_power_milliwatt(&self) -> f32 {
+        match self.0 {
             1 => 0.79,
             2 => 1.58,
             3 => 3.16,
@@ -115,11 +107,11 @@ impl TransmissionPower {
     }
 }
 
-struct Parameters {
-    mode: PhantomData<Mode>,
-    baud_rate: BaudRate,
-    channel: Channel,
-    power: TransmissionPower,
+pub struct Parameters {
+    pub mode: PhantomData<Mode>,
+    pub baud_rate: BaudRate,
+    pub channel: Channel,
+    pub power: TransmissionPower,
 }
 
 #[derive(Debug, Default)]
@@ -129,177 +121,30 @@ pub struct Hc12<P, S, D> {
     serial: S,
 }
 
-impl<P, S, D> Hc12<P, S, D>
-where
-    P: OutputPin,
-    D: DelayMs<u16>,
-    S: Read<u8> + Write<u8>,
-{
-    pub fn new(mut set_pin: P, mut delay: D, serial: S) -> Option<Hc12<P, S, D>> {
-        set_pin.set_low().ok()?;
-        delay.delay_ms(50);
-        Some(Hc12 {
-            set_pin,
-            serial,
-            delay,
-        })
-    }
+pub fn ok_query() {
+    let buffer: [u8; 4] = [0; 4];
+    /*let _ = CommandBuilder::create_execute(&mut buffer, true)
+        .named("")
+        .finish()
+        .unwrap();
+    */
+    let query = [b'A', b'T', b'\r', b'\n'];
 
-    pub fn release(mut self) -> (P, D, S) {
-        self.set_pin.set_high().ok().unwrap();
-        self.delay.delay_ms(12);
-        (self.set_pin, self.delay, self.serial)
-    }
-
-    fn write_buffer(&mut self, buffer: &[u8]) -> Result<(), Error> {
-        for ch in buffer.iter() {
-            match self.serial.write(*ch) {
-                Ok(_) => {}
-                Err(_) => {}
-            }
-        }
-        Ok(())
-    }
-
-    fn read_buffer(&mut self, buffer: &mut [u8]) -> Result<(), Error> {
-        let mut n = 0;
-        while n < buffer.len() {
-            if let Ok(ch) = self.serial.read() {
-                buffer[n] = ch;
-                n += 1;
-            }
-        }
-        Ok(())
-    }
-
-    pub fn get_firmware_version(&mut self) -> &str {
-        "TODO"
-    }
-
-    pub fn is_ok(&mut self) -> bool {
-        let mut buffer: [u8; 4] = [0; 4];
-        /*let _ = CommandBuilder::create_execute(&mut buffer, true)
-            .named("")
-            .finish()
-            .unwrap();
-        */
-        let query = ['A' as u8, 'T' as u8, '\r' as u8, '\n' as u8];
-        self.write_buffer(&query);
-
-        let mut buffer: [u8; 4] = [0; 4];
-        self.read_buffer(&mut buffer);
-        buffer == ['O' as u8, 'k' as u8, '\r' as u8, '\n' as u8]
-    }
-
-    pub fn go_to_sleep(self) -> Hc12<P, S, D> {
-        todo!();
-        Hc12 {
-            set_pin: self.set_pin,
-            serial: self.serial,
-            delay: self.delay,
-        }
-    }
-
-    pub fn set_default_settings(&mut self) {
-        todo!()
-    }
-}
-
-#[derive(Debug, Default)]
-struct SleepingHc12<P, S, D> {
-    set_pin: P,
-    delay: D,
-    serial: S,
-}
-
-impl<P, S, D> SleepingHc12<P, S, D>
-where
-    P: OutputPin,
-    D: DelayMs<u16>,
-    S: Read<u8> + Write<u8>,
-{
-    pub fn wake_up(mut self) -> Option<Hc12<P, S, D>> {
-        self.set_pin.set_low().ok()?;
-        self.delay.delay_ms(50);
-        Some(Hc12 {
-            set_pin: self.set_pin,
-            serial: self.serial,
-            delay: self.delay,
-        })
-    }
+    let buffer = [b'O', b'k', b'\r', b'\n'];
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use embedded_hal_mock::{
-        pin::{self, State},
-        serial,
-    };
-
-    #[test]
-    fn bare_at_some() {
-        let serial_expectations = [];
-        let pin_expectations = [
-            pin::Transaction::set(State::Low),
-            pin::Transaction::set(State::High),
-        ];
-        let serial = serial::Mock::<u8>::new(&serial_expectations);
-        let delay = embedded_hal_mock::delay::MockNoop;
-        let set_pin = embedded_hal_mock::pin::Mock::new(&pin_expectations);
-        let hc12 = Hc12::new(set_pin, delay, serial).unwrap();
-        let (mut p, _, mut s) = hc12.release();
-        p.done();
-        s.done();
-    }
 
     #[test]
     fn is_ok() {
-        let expectations = [
-            serial::Transaction::write('A' as u8),
-            serial::Transaction::write('T' as u8),
-            serial::Transaction::write('\r' as u8),
-            serial::Transaction::write('\n' as u8),
-            serial::Transaction::read('O' as u8),
-            serial::Transaction::read('k' as u8),
-            serial::Transaction::read('\r' as u8),
-            serial::Transaction::read('\n' as u8),
-        ];
-        let pin_expectations = [
-            pin::Transaction::set(State::Low),
-            pin::Transaction::set(State::High),
-        ];
-        let serial = serial::Mock::<u8>::new(&expectations);
-        let delay = embedded_hal_mock::delay::MockNoop;
-        let set_pin = embedded_hal_mock::pin::Mock::new(&pin_expectations);
-        let mut hc12 = Hc12::new(set_pin, delay, serial).unwrap();
-        assert!(hc12.is_ok());
-        let (mut p, _, mut s) = hc12.release();
-        p.done();
-        s.done();
+        let expected = b"AT\r\nOk\r\n";
     }
 
     #[test]
     fn bare_at_none() {
-        let expectations = [
-            serial::Transaction::write('A' as u8),
-            serial::Transaction::write('T' as u8),
-            serial::Transaction::write('\r' as u8),
-            serial::Transaction::write('\n' as u8),
-            serial::Transaction::read('B' as u8),
-            serial::Transaction::read('l' as u8),
-            serial::Transaction::read('a' as u8),
-            serial::Transaction::read('\r' as u8),
-            serial::Transaction::read('\n' as u8),
-        ];
-        let pin_expectations = [
-            pin::Transaction::set(State::Low),
-            pin::Transaction::set(State::High),
-        ];
-        let serial = serial::Mock::new(&expectations);
-        let delay = embedded_hal_mock::delay::MockNoop;
-        let set_pin = embedded_hal_mock::pin::Mock::new(&pin_expectations);
-        let _ = Hc12::new(set_pin, delay, serial).is_none();
+        let expected = b"AT\r\nBla\r\n";
     }
 
     #[test]
@@ -310,13 +155,13 @@ mod tests {
 
     #[test]
     fn test_channel_get_freq_100() {
-        let chan = Channel { channel: 100 };
+        let chan = Channel(100);
         assert_eq!(473.0f32, chan.get_freq_mhz());
     }
 
     #[test]
     fn test_channel_get_freq_21() {
-        let chan = Channel { channel: 21 };
+        let chan = Channel(21);
         assert_eq!(441.4f32, chan.get_freq_mhz());
     }
 
