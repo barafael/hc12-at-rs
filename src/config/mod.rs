@@ -28,9 +28,7 @@ impl SetBaudRate for Parameters<Fu1> {
 impl SetBaudRate for Parameters<Fu2> {
     fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
         match rate {
-            BaudRate::Bps1200 | BaudRate::Bps2400 | BaudRate::Bps4800 => {
-
-            },
+            BaudRate::Bps1200 | BaudRate::Bps2400 | BaudRate::Bps4800 => {}
             _ => return Err(Error::InvalidBaudRate),
         }
         self.baud_rate = rate;
@@ -191,14 +189,6 @@ impl Default for Parameters<Fu3> {
             mode: PhantomData::<Fu3>,
         }
     }
-}
-
-#[derive(Debug)]
-pub struct Hc12<P, S, D, M> {
-    set_pin: P,
-    delay: D,
-    serial: S,
-    parameters: Parameters<M>,
 }
 
 pub(crate) const OK_QUERY: [u8; 4] = *b"AT\r\n";

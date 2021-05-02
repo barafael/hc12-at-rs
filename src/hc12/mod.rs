@@ -1,44 +1,46 @@
-use crate::config;
-
 use embedded_hal::blocking::delay::DelayMs;
-use embedded_hal::prelude::_embedded_hal_serial_Write;
 use embedded_hal::{
     digital::v2::OutputPin,
     serial::{Read, Write},
 };
 use nb::*;
 
+use crate::config::{Fu3, Parameters};
+
 #[derive(Debug)]
-pub struct Hc12<S, D, O>
+pub struct Hc12<S, P, D, M>
 where
-    D: DelayMs<u32>,
     S: Read<u8> + Write<u8>,
-    O: OutputPin,
+    P: OutputPin,
+    D: DelayMs<u32>,
 {
-    delay: D,
     serial: S,
-    set_pin: O,
+    set_pin: P,
+    delay: D,
+    parameters: Parameters<M>,
 }
 
-impl<S, D, O> Hc12<S, D, O>
+impl<S, P, D> Hc12<S, P, D, Fu3>
 where
-    D: DelayMs<u32>,
     S: Read<u8> + Write<u8>,
-    O: OutputPin,
+    P: OutputPin,
+    D: DelayMs<u32>,
 {
-    pub fn new(delay: D, serial: S, set_pin: O) -> Self {
+    pub fn new(serial: S, set_pin: P, delay: D) -> Self {
         Self {
-            delay,
             serial,
             set_pin,
+            delay,
+            parameters: Parameters::default(),
         }
     }
 
-    pub fn release(mut self) -> (S, D, O) {
+    pub fn release(mut self) -> (S, P, D) {
         self.set_pin.set_high().ok().unwrap();
         self.delay.delay_ms(12);
-        (self.serial, self.delay, self.set_pin)
+        (self.serial, self.set_pin, self.delay)
     }
+
     pub fn write_buffer(&mut self, buffer: &[u8]) -> Result<(), Error<crate::Error>> {
         for ch in buffer.iter() {
             match self.serial.write(*ch) {
