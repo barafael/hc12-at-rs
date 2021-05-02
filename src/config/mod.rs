@@ -4,11 +4,72 @@ use core::marker::PhantomData;
 
 use at_commands::builder::CommandBuilder;
 
-pub enum Mode {
-    Fu1,
-    Fu2,
-    Fu3,
-    Fu4,
+trait SetBaudRate {
+    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error>;
+    fn get_air_baud_rate(&self) -> AirBaudRate;
+}
+
+pub struct Fu1;
+pub struct Fu2;
+pub struct Fu3;
+pub struct Fu4;
+
+impl SetBaudRate for Parameters<Fu1> {
+    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
+        self.baud_rate = rate;
+        Ok(())
+    }
+
+    fn get_air_baud_rate(&self) -> AirBaudRate {
+        AirBaudRate::Bps250000
+    }
+}
+
+impl SetBaudRate for Parameters<Fu2> {
+    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
+        match rate {
+            BaudRate::Bps1200 | BaudRate::Bps2400 | BaudRate::Bps4800 => {
+
+            },
+            _ => return Err(Error::InvalidBaudRate),
+        }
+        self.baud_rate = rate;
+        Ok(())
+    }
+
+    fn get_air_baud_rate(&self) -> AirBaudRate {
+        AirBaudRate::Bps250000
+    }
+}
+
+impl SetBaudRate for Parameters<Fu3> {
+    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
+        self.baud_rate = rate;
+        Ok(())
+    }
+
+    fn get_air_baud_rate(&self) -> AirBaudRate {
+        match self.baud_rate {
+            BaudRate::Bps1200 => AirBaudRate::Bps5000,
+            BaudRate::Bps2400 => AirBaudRate::Bps5000,
+            BaudRate::Bps4800 => AirBaudRate::Bps15000,
+            BaudRate::Bps9600 => AirBaudRate::Bps15000,
+            BaudRate::Bps19200 => AirBaudRate::Bps58000,
+            BaudRate::Bps38400 => AirBaudRate::Bps58000,
+            BaudRate::Bps57600 => AirBaudRate::Bps236000,
+            BaudRate::Bps115200 => AirBaudRate::Bps236000,
+        }
+    }
+}
+
+pub fn get_wireless_sensitivity_dbm(air_rate: AirBaudRate) -> i32 {
+    match air_rate {
+        AirBaudRate::Bps5000 => -117,
+        AirBaudRate::Bps15000 => -117,
+        AirBaudRate::Bps58000 => -112,
+        AirBaudRate::Bps236000 => -100,
+        AirBaudRate::Bps250000 => -100, // TODO Datasheet doesn't say; extrapolate
+    }
 }
 
 pub enum ChannelError {
@@ -23,6 +84,7 @@ impl From<ChannelError> for Error {
     }
 }
 
+#[derive(Debug)]
 pub struct Channel(u8);
 
 impl Default for Channel {
@@ -46,6 +108,7 @@ impl Channel {
     }
 }
 
+#[derive(Debug)]
 pub enum BaudRate {
     Bps1200,
     Bps2400,
@@ -57,11 +120,13 @@ pub enum BaudRate {
     Bps115200,
 }
 
+#[derive(Debug)]
 pub enum AirBaudRate {
     Bps5000,
     Bps15000,
     Bps58000,
     Bps236000,
+    Bps250000,
 }
 
 impl Default for BaudRate {
@@ -70,30 +135,7 @@ impl Default for BaudRate {
     }
 }
 
-impl BaudRate {
-    pub fn get_air_baud_rate(&self) -> AirBaudRate {
-        match self {
-            BaudRate::Bps1200 => AirBaudRate::Bps5000,
-            BaudRate::Bps2400 => AirBaudRate::Bps5000,
-            BaudRate::Bps4800 => AirBaudRate::Bps15000,
-            BaudRate::Bps9600 => AirBaudRate::Bps15000,
-            BaudRate::Bps19200 => AirBaudRate::Bps58000,
-            BaudRate::Bps38400 => AirBaudRate::Bps58000,
-            BaudRate::Bps57600 => AirBaudRate::Bps236000,
-            BaudRate::Bps115200 => AirBaudRate::Bps236000,
-        }
-    }
-
-    pub fn get_wireless_sensitivity_dbm(&self) -> i32 {
-        match self.get_air_baud_rate() {
-            AirBaudRate::Bps5000 => -117,
-            AirBaudRate::Bps15000 => -117,
-            AirBaudRate::Bps58000 => -112,
-            AirBaudRate::Bps236000 => -100,
-        }
-    }
-}
-
+#[derive(Debug)]
 pub struct TransmissionPower(u8);
 
 impl Default for TransmissionPower {
@@ -132,45 +174,43 @@ impl TransmissionPower {
     }
 }
 
-pub struct Parameters {
-    pub mode: PhantomData<Mode>,
+#[derive(Debug)]
+pub struct Parameters<M> {
     pub baud_rate: BaudRate,
     pub channel: Channel,
     pub power: TransmissionPower,
+    pub mode: PhantomData<M>,
 }
 
-#[derive(Debug, Default)]
-pub struct Hc12<P, S, D> {
+impl Default for Parameters<Fu3> {
+    fn default() -> Self {
+        Self {
+            baud_rate: BaudRate::default(),
+            channel: Channel::default(),
+            power: TransmissionPower::default(),
+            mode: PhantomData::<Fu3>,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Hc12<P, S, D, M> {
     set_pin: P,
     delay: D,
     serial: S,
+    parameters: Parameters<M>,
 }
 
-pub fn ok_query() {
-    let buffer: [u8; 4] = [0; 4];
-    /*let _ = CommandBuilder::create_execute(&mut buffer, true)
-        .named("")
-        .finish()
-        .unwrap();
-    */
-    let query = b"AT\r\n";
-
-    let buffer = b"Ok\r\n";
-}
+pub(crate) const OK_QUERY: [u8; 4] = *b"AT\r\n";
+pub(crate) const OK_RESPONSE: [u8; 4] = *b"Ok\r\n";
+pub(crate) const SLEEP_COMMAND: [u8; 10] = *b"AT+SLEEP\r\n";
+pub(crate) const REVISION_QUERY: [u8; 6] = *b"AT+V\r\n";
+pub(crate) const RESET_SETTINGS_COMMAND: [u8; 12] = *b"AT+DEFAULT\r\n";
+pub(crate) const UPDATE_COMMAND: [u8; 11] = *b"AT+UPDATE\r\n";
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn is_ok() {
-        let expected = b"AT\r\nOk\r\n";
-    }
-
-    #[test]
-    fn bare_at_none() {
-        let expected = b"AT\r\nBla\r\n";
-    }
 
     #[test]
     fn test_channel_get_freq_default() {

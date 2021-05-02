@@ -8,4 +8,5 @@ pub enum Error {
     Read,
     Write,
     InvalidChannel(u8),
+    InvalidBaudRate,
 }
