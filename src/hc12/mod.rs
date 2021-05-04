@@ -69,7 +69,7 @@ where
     P: OutputPin,
     D: DelayMs<u32>,
 {
-    type Error = Self::Error;
+    type Error = <S as Read<u8>>::Error;
 
     fn read(&mut self) -> nb::Result<u8, Self::Error> {
         self.serial.read()
@@ -82,7 +82,7 @@ where
     P: OutputPin,
     D: DelayMs<u32>,
 {
-    type Error = nb::Error<u8>;
+    type Error = <S as Write<u8>>::Error;
     fn write(&mut self, word: u8) -> nb::Result<(), Self::Error> {
         self.serial.write(word)
     }
