@@ -62,3 +62,32 @@ where
         Ok(())
     }
 }
+
+impl<S, P, D, T> embedded_hal::serial::Read<u8> for Hc12<S, P, D, T>
+where
+    S: Read<u8> + Write<u8>,
+    P: OutputPin,
+    D: DelayMs<u32>,
+{
+    type Error = Self::Error;
+
+    fn read(&mut self) -> nb::Result<u8, Self::Error> {
+        self.serial.read()
+    }
+}
+
+impl<S, P, D, T> embedded_hal::serial::Write<u8> for Hc12<S, P, D, T>
+where
+    S: embedded_hal::serial::Read<u8> + embedded_hal::serial::Write<u8>,
+    P: OutputPin,
+    D: DelayMs<u32>,
+{
+    type Error = nb::Error<u8>;
+    fn write(&mut self, word: u8) -> nb::Result<(), Self::Error> {
+        self.serial.write(word)
+    }
+
+    fn flush(&mut self) -> nb::Result<(), Self::Error> {
+        self.serial.flush()
+    }
+}
