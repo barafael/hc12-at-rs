@@ -9,53 +9,70 @@ trait SetBaudRate {
     fn get_air_baud_rate(&self) -> AirBaudRate;
 }
 
-pub struct Fu1;
-pub struct Fu2;
-pub struct Fu3;
-pub struct Fu4;
+#[derive(Debug)]
+pub enum Mode {
+    Fu1,
+    Fu2,
+    Fu3,
+    Fu4,
+}
 
-impl SetBaudRate for Parameters<Fu1> {
-    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
-        self.baud_rate = rate;
-        Ok(())
-    }
-
-    fn get_air_baud_rate(&self) -> AirBaudRate {
-        AirBaudRate::Bps250000
+impl Default for Mode {
+    fn default() -> Self {
+        Self::Fu3
     }
 }
 
-impl SetBaudRate for Parameters<Fu2> {
+impl SetBaudRate for Parameters {
+
     fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
-        match rate {
-            BaudRate::Bps1200 | BaudRate::Bps2400 | BaudRate::Bps4800 => {}
-            _ => return Err(Error::InvalidBaudRate),
+        match self.mode {
+            Mode::Fu1 => {
+                self.baud_rate = rate;
+                Ok(())
+            }
+            Mode::Fu2 => {
+                match rate {
+                    BaudRate::Bps1200 | BaudRate::Bps2400 | BaudRate::Bps4800 => {
+                        self.baud_rate = rate;
+                        Ok(())
+                    }
+                    _ => return Err(Error::InvalidBaudRate),
+                }
+            }
+            Mode::Fu3 => {
+                self.baud_rate = rate;
+                Ok(())
+            }
+            Mode::Fu4 => {
+                todo!()
+            }
         }
-        self.baud_rate = rate;
-        Ok(())
     }
 
     fn get_air_baud_rate(&self) -> AirBaudRate {
-        AirBaudRate::Bps250000
-    }
-}
-
-impl SetBaudRate for Parameters<Fu3> {
-    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
-        self.baud_rate = rate;
-        Ok(())
-    }
-
-    fn get_air_baud_rate(&self) -> AirBaudRate {
-        match self.baud_rate {
-            BaudRate::Bps1200 => AirBaudRate::Bps5000,
-            BaudRate::Bps2400 => AirBaudRate::Bps5000,
-            BaudRate::Bps4800 => AirBaudRate::Bps15000,
-            BaudRate::Bps9600 => AirBaudRate::Bps15000,
-            BaudRate::Bps19200 => AirBaudRate::Bps58000,
-            BaudRate::Bps38400 => AirBaudRate::Bps58000,
-            BaudRate::Bps57600 => AirBaudRate::Bps236000,
-            BaudRate::Bps115200 => AirBaudRate::Bps236000,
+        match self.mode {
+            Mode::Fu1 => {
+                AirBaudRate::Bps250000
+            }
+            Mode::Fu2 => {
+                AirBaudRate::Bps250000
+            }
+            Mode::Fu3 => {
+                match self.baud_rate {
+                    BaudRate::Bps1200 => AirBaudRate::Bps5000,
+                    BaudRate::Bps2400 => AirBaudRate::Bps5000,
+                    BaudRate::Bps4800 => AirBaudRate::Bps15000,
+                    BaudRate::Bps9600 => AirBaudRate::Bps15000,
+                    BaudRate::Bps19200 => AirBaudRate::Bps58000,
+                    BaudRate::Bps38400 => AirBaudRate::Bps58000,
+                    BaudRate::Bps57600 => AirBaudRate::Bps236000,
+                    BaudRate::Bps115200 => AirBaudRate::Bps236000,
+                }
+            }
+            Mode::Fu4 => {
+                todo!()
+            }
         }
     }
 }
@@ -66,7 +83,7 @@ pub fn get_wireless_sensitivity_dbm(air_rate: AirBaudRate) -> i32 {
         AirBaudRate::Bps15000 => -117,
         AirBaudRate::Bps58000 => -112,
         AirBaudRate::Bps236000 => -100,
-        AirBaudRate::Bps250000 => -100, // TODO Datasheet doesn't say; extrapolate
+        AirBaudRate::Bps250000 => -100, // TODO Datasheet doesn't say; extrapolate?
     }
 }
 
@@ -173,20 +190,20 @@ impl TransmissionPower {
 }
 
 #[derive(Debug)]
-pub struct Parameters<M> {
+pub struct Parameters {
     pub baud_rate: BaudRate,
     pub channel: Channel,
     pub power: TransmissionPower,
-    pub mode: PhantomData<M>,
+    pub mode: Mode,
 }
 
-impl Default for Parameters<Fu3> {
+impl Default for Parameters {
     fn default() -> Self {
         Self {
             baud_rate: BaudRate::default(),
             channel: Channel::default(),
             power: TransmissionPower::default(),
-            mode: PhantomData::<Fu3>,
+            mode: Mode::default(),
         }
     }
 }

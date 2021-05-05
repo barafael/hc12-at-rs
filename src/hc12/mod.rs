@@ -5,10 +5,10 @@ use embedded_hal::{
 };
 use nb::*;
 
-use crate::config::{Fu3, Parameters};
+use crate::config::Parameters;
 
 #[derive(Debug)]
-pub struct Hc12<S, P, D, M>
+pub struct Hc12<S, P, D>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
@@ -17,10 +17,10 @@ where
     serial: S,
     set_pin: P,
     delay: D,
-    parameters: Parameters<M>,
+    parameters: Parameters,
 }
 
-impl<S, P, D> Hc12<S, P, D, Fu3>
+impl<S, P, D> Hc12<S, P, D>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
@@ -63,7 +63,7 @@ where
     }
 }
 
-impl<S, P, D, T> embedded_hal::serial::Read<u8> for Hc12<S, P, D, T>
+impl<S, P, D> embedded_hal::serial::Read<u8> for Hc12<S, P, D>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
@@ -76,7 +76,7 @@ where
     }
 }
 
-impl<S, P, D, T> embedded_hal::serial::Write<u8> for Hc12<S, P, D, T>
+impl<S, P, D> embedded_hal::serial::Write<u8> for Hc12<S, P, D>
 where
     S: embedded_hal::serial::Read<u8> + embedded_hal::serial::Write<u8>,
     P: OutputPin,
