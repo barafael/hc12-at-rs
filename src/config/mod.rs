@@ -9,6 +9,12 @@ trait SetBaudRate {
     fn get_air_baud_rate(&self) -> AirBaudRate;
 }
 
+/// Normal mode marker
+pub struct Normal;
+
+/// Configuration mode marker
+pub struct Configuration;
+
 #[derive(Debug)]
 pub enum Mode {
     Fu1,
@@ -24,22 +30,19 @@ impl Default for Mode {
 }
 
 impl SetBaudRate for Parameters {
-
     fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
         match self.mode {
             Mode::Fu1 => {
                 self.baud_rate = rate;
                 Ok(())
             }
-            Mode::Fu2 => {
-                match rate {
-                    BaudRate::Bps1200 | BaudRate::Bps2400 | BaudRate::Bps4800 => {
-                        self.baud_rate = rate;
-                        Ok(())
-                    }
-                    _ => return Err(Error::InvalidBaudRate),
+            Mode::Fu2 => match rate {
+                BaudRate::Bps1200 | BaudRate::Bps2400 | BaudRate::Bps4800 => {
+                    self.baud_rate = rate;
+                    Ok(())
                 }
-            }
+                _ => return Err(Error::InvalidBaudRate),
+            },
             Mode::Fu3 => {
                 self.baud_rate = rate;
                 Ok(())
@@ -52,24 +55,18 @@ impl SetBaudRate for Parameters {
 
     fn get_air_baud_rate(&self) -> AirBaudRate {
         match self.mode {
-            Mode::Fu1 => {
-                AirBaudRate::Bps250000
-            }
-            Mode::Fu2 => {
-                AirBaudRate::Bps250000
-            }
-            Mode::Fu3 => {
-                match self.baud_rate {
-                    BaudRate::Bps1200 => AirBaudRate::Bps5000,
-                    BaudRate::Bps2400 => AirBaudRate::Bps5000,
-                    BaudRate::Bps4800 => AirBaudRate::Bps15000,
-                    BaudRate::Bps9600 => AirBaudRate::Bps15000,
-                    BaudRate::Bps19200 => AirBaudRate::Bps58000,
-                    BaudRate::Bps38400 => AirBaudRate::Bps58000,
-                    BaudRate::Bps57600 => AirBaudRate::Bps236000,
-                    BaudRate::Bps115200 => AirBaudRate::Bps236000,
-                }
-            }
+            Mode::Fu1 => AirBaudRate::Bps250000,
+            Mode::Fu2 => AirBaudRate::Bps250000,
+            Mode::Fu3 => match self.baud_rate {
+                BaudRate::Bps1200 => AirBaudRate::Bps5000,
+                BaudRate::Bps2400 => AirBaudRate::Bps5000,
+                BaudRate::Bps4800 => AirBaudRate::Bps15000,
+                BaudRate::Bps9600 => AirBaudRate::Bps15000,
+                BaudRate::Bps19200 => AirBaudRate::Bps58000,
+                BaudRate::Bps38400 => AirBaudRate::Bps58000,
+                BaudRate::Bps57600 => AirBaudRate::Bps236000,
+                BaudRate::Bps115200 => AirBaudRate::Bps236000,
+            },
             Mode::Fu4 => {
                 todo!()
             }
