@@ -58,10 +58,7 @@ where
 
     pub fn write_buffer(&mut self, buffer: &[u8]) -> Result<(), Error<crate::Error>> {
         for ch in buffer.iter() {
-            match block!(self.serial.write(*ch)) {
-                Ok(_) => {}
-                Err(_) => {}
-            }
+            let _ = block!(self.serial.write(*ch));
         }
         Ok(())
     }
@@ -139,10 +136,7 @@ where
 
     pub fn is_ok(&mut self) -> bool {
         for ch in b"AT\r\n".iter() {
-            match block!(self.serial.write(*ch)) {
-                Ok(_) => {}
-                Err(_) => {}
-            }
+            let _ = block!(self.serial.write(*ch));
         }
         let mut n = 0;
         let mut buffer = [0u8; 4];
@@ -152,6 +146,6 @@ where
                 n += 1;
             }
         }
-        return buffer == *b"OK\r\n";
+        buffer == *b"OK\r\n"
     }
 }

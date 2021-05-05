@@ -33,7 +33,7 @@ impl SetBaudRate for Parameters {
                     self.baud_rate = rate;
                     Ok(())
                 }
-                _ => return Err(Error::InvalidBaudRate),
+                _ => Err(Error::InvalidBaudRate),
             },
             Mode::Fu3 => {
                 self.baud_rate = rate;
