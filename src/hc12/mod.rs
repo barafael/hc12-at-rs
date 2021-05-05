@@ -9,6 +9,9 @@ use nb::*;
 
 use crate::config::Parameters;
 
+#[cfg(test)]
+mod test;
+
 /// Normal mode marker
 pub struct Normal;
 
@@ -36,7 +39,7 @@ where
     D: DelayMs<u32>,
 {
     pub fn new(serial: S, mut set_pin: P, mut delay: D) -> Self {
-        set_pin.set_high();
+        let _ = set_pin.set_high();
         delay.delay_ms(20); // TODO which duration?
                             // TODO read configuration; if it does not work, baud rate is wrong.
                             // TODO when e-hal supports changing the baud rate, try to probe the right one
@@ -49,9 +52,7 @@ where
         }
     }
 
-    pub fn release(mut self) -> (S, P, D) {
-        self.set_pin.set_high().ok().unwrap();
-        self.delay.delay_ms(12);
+    pub fn release(self) -> (S, P, D) {
         (self.serial, self.set_pin, self.delay)
     }
 

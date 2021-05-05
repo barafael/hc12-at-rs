@@ -1,19 +1,11 @@
 use crate::Error;
 
-use core::marker::PhantomData;
-
 use at_commands::builder::CommandBuilder;
 
 trait SetBaudRate {
     fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error>;
     fn get_air_baud_rate(&self) -> AirBaudRate;
 }
-
-/// Normal mode marker
-pub struct Normal;
-
-/// Configuration mode marker
-pub struct Configuration;
 
 #[derive(Debug)]
 pub enum Mode {
