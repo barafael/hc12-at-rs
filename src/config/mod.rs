@@ -112,7 +112,7 @@ impl Channel {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum BaudRate {
     Bps1200,
     Bps2400,
@@ -124,7 +124,7 @@ pub enum BaudRate {
     Bps115200,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum AirBaudRate {
     Bps5000,
     Bps15000,
@@ -233,5 +233,16 @@ mod tests {
         assert!(chan.set_channel(89).is_ok());
         assert!(chan.set_channel(128).is_err());
         assert!(chan.set_channel(200).is_err());
+    }
+
+    #[test]
+    fn baud_rate_set() {
+        let mut params = Parameters::default();
+        params.set_baud_rate(BaudRate::Bps115200).unwrap();
+        assert_eq!(params.baud_rate, BaudRate::Bps115200);
+        params.mode = Mode::Fu1;
+        params.set_baud_rate(BaudRate::Bps1200).unwrap();
+        assert_eq!(params.baud_rate, BaudRate::Bps1200);
+        assert_eq!(params.get_air_baud_rate(), AirBaudRate::Bps250000);
     }
 }
