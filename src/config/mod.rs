@@ -1,3 +1,5 @@
+use core::convert::TryFrom;
+
 use crate::Error;
 
 use num_derive::{FromPrimitive, ToPrimitive};
@@ -90,7 +92,19 @@ impl From<ChannelError> for Error {
     }
 }
 
-#[derive(Debug)]
+impl TryFrom<u8> for Channel {
+    type Error = ChannelError;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Err(ChannelError::InvalidChannel(0)),
+            ch if ch > 127 => Err(ChannelError::InvalidChannel(ch)),
+            n => Ok(Channel(n)),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
 pub struct Channel(u8);
 
 impl Default for Channel {
