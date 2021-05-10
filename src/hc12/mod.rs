@@ -1,5 +1,6 @@
 use core::marker::PhantomData;
 
+use at_commands::builder::CommandBuilder;
 use embedded_hal::blocking::delay::DelayMs;
 use embedded_hal::{
     digital::v2::OutputPin,
@@ -147,5 +148,25 @@ where
             }
         }
         buffer == *b"OK\r\n"
+    }
+
+    pub fn read_params(&mut self) -> Result<Parameters, ()> {
+        let mut buffer = [0u8; 7];
+        let command = CommandBuilder::create_query(&mut buffer, true)
+            .named("RP")
+            .finish()
+            .unwrap();
+        for ch in command.iter() {
+            let _ = block!(self.serial.write(*ch));
+        }
+        let mut response = [0u8; 30];
+        let mut n = 0;
+        while n < 30 {
+            if let Ok(ch) = block!(self.serial.read()) {
+                response[n] = ch;
+                n += 1;
+            }
+        }
+        Ok(Parameters::default())
     }
 }

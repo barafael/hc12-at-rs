@@ -1,6 +1,8 @@
 use crate::Error;
 
-use at_commands::builder::CommandBuilder;
+use num_derive::{FromPrimitive, ToPrimitive};
+
+pub mod parser;
 
 trait SetBaudRate {
     fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error>;
@@ -112,25 +114,25 @@ impl Channel {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Eq, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum BaudRate {
-    Bps1200,
-    Bps2400,
-    Bps4800,
-    Bps9600,
-    Bps19200,
-    Bps38400,
-    Bps57600,
-    Bps115200,
+    Bps1200 = 1200,
+    Bps2400 = 2400,
+    Bps4800 = 4800,
+    Bps9600 = 9600,
+    Bps19200 = 19200,
+    Bps38400 = 38400,
+    Bps57600 = 57600,
+    Bps115200 = 115200,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Eq, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum AirBaudRate {
-    Bps5000,
-    Bps15000,
-    Bps58000,
-    Bps236000,
-    Bps250000,
+    Bps5000 = 5000,
+    Bps15000 = 15000,
+    Bps58000 = 58000,
+    Bps236000 = 236000,
+    Bps250000 = 250000,
 }
 
 impl Default for BaudRate {
@@ -208,6 +210,8 @@ pub(crate) const UPDATE_COMMAND: [u8; 11] = *b"AT+UPDATE\r\n";
 mod tests {
     use super::*;
 
+    use num_traits::{FromPrimitive, ToPrimitive};
+
     #[test]
     fn test_channel_get_freq_default() {
         let chan = Channel::default();
@@ -244,5 +248,29 @@ mod tests {
         params.set_baud_rate(BaudRate::Bps1200).unwrap();
         assert_eq!(params.baud_rate, BaudRate::Bps1200);
         assert_eq!(params.get_air_baud_rate(), AirBaudRate::Bps250000);
+    }
+
+    #[test]
+    fn baud_rate_to_primitive() {
+        assert_eq!(1200, BaudRate::Bps1200.to_u32().unwrap());
+        assert_eq!(2400, BaudRate::Bps2400.to_u32().unwrap());
+        assert_eq!(4800, BaudRate::Bps4800.to_u32().unwrap());
+        assert_eq!(9600, BaudRate::Bps9600.to_u32().unwrap());
+        assert_eq!(19200, BaudRate::Bps19200.to_u32().unwrap());
+        assert_eq!(38400, BaudRate::Bps38400.to_u32().unwrap());
+        assert_eq!(57600, BaudRate::Bps57600.to_u32().unwrap());
+        assert_eq!(115200, BaudRate::Bps115200.to_u32().unwrap());
+    }
+
+    #[test]
+    fn baud_rate_from_primitive() {
+        assert_eq!(BaudRate::Bps1200, BaudRate::from_u32(1200).unwrap());
+        assert_eq!(BaudRate::Bps2400, BaudRate::from_u32(2400).unwrap());
+        assert_eq!(BaudRate::Bps4800, BaudRate::from_u32(4800).unwrap());
+        assert_eq!(BaudRate::Bps9600, BaudRate::from_u32(9600).unwrap());
+        assert_eq!(BaudRate::Bps19200, BaudRate::from_u32(19200).unwrap());
+        assert_eq!(BaudRate::Bps38400, BaudRate::from_u32(38400).unwrap());
+        assert_eq!(BaudRate::Bps57600, BaudRate::from_u32(57600).unwrap());
+        assert_eq!(BaudRate::Bps115200, BaudRate::from_u32(115200).unwrap());
     }
 }
