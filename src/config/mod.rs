@@ -4,6 +4,7 @@ use crate::Error;
 
 use num_derive::{FromPrimitive, ToPrimitive};
 
+pub mod command;
 pub mod parser;
 
 #[cfg(test)]
@@ -107,7 +108,7 @@ impl TryFrom<u8> for Channel {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, ToPrimitive, FromPrimitive, PartialEq, Eq)]
 pub struct Channel(u8);
 
 impl Default for Channel {
@@ -131,7 +132,8 @@ impl Channel {
     }
 }
 
-#[derive(Debug, Eq, PartialEq, FromPrimitive, ToPrimitive)]
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum BaudRate {
     Bps1200 = 1200,
     Bps2400 = 2400,
