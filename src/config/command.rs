@@ -1,10 +1,12 @@
+//! Convert a Baudrate, Channel, Mode, or Power, to a command for configuring the Hc12.
+
 use core::convert::TryInto;
 
 use at_commands::builder::CommandBuilder;
+
+use super::parameters::{BaudRate, Channel, Mode, TransmissionPower};
+
 use num_traits::ToPrimitive;
-
-use super::{BaudRate, Channel, Mode, TransmissionPower};
-
 pub trait ToCommand {
     fn to_command(&self, buffer: &mut [u8; 16]) -> usize;
 }

@@ -1,8 +1,10 @@
+//! Parse responses from a Hc12
+
 use core::convert::TryFrom;
 
 use at_commands::parser::CommandParser;
 
-use super::{BaudRate, Channel, Parameters};
+use super::parameters::{BaudRate, Channel, Parameters};
 
 impl TryFrom<i32> for BaudRate {
     type Error = ();

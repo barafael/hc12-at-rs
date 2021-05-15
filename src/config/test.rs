@@ -1,9 +1,6 @@
-use std::convert::TryFrom;
+use core::convert::TryFrom;
 
-use crate::config::{
-    command::ToCommand, AirBaudRate, BaudRate, Channel, Mode, Parameters, SetBaudRate,
-    TransmissionPower,
-};
+use crate::config::{command::ToCommand, parameters::{AirBaudRate, BaudRataParameter, BaudRate, Channel, Mode, Parameters, TransmissionPower}};
 
 use super::query::{Param, ToQuery};
 
@@ -77,7 +74,16 @@ fn query_single_param() {
     let param = Param::BaudRate;
     let mut buffer = [0u8; 16];
     let n = param.to_query(&mut buffer);
-    assert_eq!(b"AT+RB\r\n", &buffer[0..n]);
+    assert_eq!(b"AT+RB\r\n", &buffer[..n]);
+    let param = Param::Channel;
+    let n = param.to_query(&mut buffer);
+    assert_eq!(b"AT+RC\r\n", &buffer[..n]);
+    let param = Param::Mode;
+    let n = param.to_query(&mut buffer);
+    assert_eq!(b"AT+RF\r\n", &buffer[..n]);
+    let param = Param::Power;
+    let n = param.to_query(&mut buffer);
+    assert_eq!(b"AT+RP\r\n", &buffer[..n]);
 }
 
 #[test]
