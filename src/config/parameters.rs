@@ -108,7 +108,7 @@ impl TryFrom<u8> for Channel {
 }
 
 #[derive(Debug, ToPrimitive, FromPrimitive, PartialEq, Eq)]
-pub struct Channel(pub(crate)u8);
+pub struct Channel(pub(crate) u8);
 
 impl Default for Channel {
     fn default() -> Self {
@@ -160,7 +160,7 @@ impl Default for BaudRate {
 }
 
 #[derive(Debug)]
-pub struct TransmissionPower(pub(crate)u8);
+pub struct TransmissionPower(pub(crate) u8);
 
 impl Default for TransmissionPower {
     fn default() -> Self {

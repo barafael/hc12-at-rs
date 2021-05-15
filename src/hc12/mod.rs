@@ -7,7 +7,7 @@ use embedded_hal::{
 };
 use nb::*;
 
-use crate::config::parameters::{OK_QUERY, OK_RESPONSE, Parameters};
+use crate::config::parameters::{Parameters, OK_QUERY, OK_RESPONSE};
 
 #[cfg(test)]
 mod test;
