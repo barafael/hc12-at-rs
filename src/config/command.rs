@@ -4,7 +4,9 @@ use core::convert::TryInto;
 
 use at_commands::builder::CommandBuilder;
 
-use super::parameters::{BaudRate, Channel, Mode, TransmissionPower};
+use super::parameters::{
+    BaudRate, Channel, Mode, TransmissionPower, RESET_SETTINGS_COMMAND, SLEEP_COMMAND,
+};
 
 use num_traits::ToPrimitive;
 pub trait ToCommand {
@@ -132,5 +134,23 @@ impl ToCommand for TransmissionPower {
             _ => unreachable!(),
         }
         7
+    }
+}
+
+pub(crate) struct Sleep;
+
+impl ToCommand for Sleep {
+    fn to_command(&self, buffer: &mut [u8; 16]) -> usize {
+        buffer[..SLEEP_COMMAND.len()].copy_from_slice(&SLEEP_COMMAND);
+        SLEEP_COMMAND.len()
+    }
+}
+
+pub(crate) struct DefaultSettings;
+
+impl ToCommand for DefaultSettings {
+    fn to_command(&self, buffer: &mut [u8; 16]) -> usize {
+        buffer[..RESET_SETTINGS_COMMAND.len()].copy_from_slice(&RESET_SETTINGS_COMMAND);
+        RESET_SETTINGS_COMMAND.len()
     }
 }
