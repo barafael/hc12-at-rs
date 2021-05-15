@@ -7,7 +7,10 @@ use embedded_hal::{
 };
 use nb::*;
 
-use crate::config::parameters::{Parameters, OK_QUERY, OK_RESPONSE};
+use crate::config::parameters::{
+    Parameters, OK_QUERY, OK_RESPONSE, RESET_SETTINGS_COMMAND, RESET_SETTINGS_RESPONSE,
+    SLEEP_COMMAND, SLEEP_RESPONSE, VERSION_QUERY,
+};
 
 #[cfg(test)]
 mod test;
@@ -17,6 +20,9 @@ pub struct Normal;
 
 /// Configuration mode marker
 pub struct Configuration;
+
+/// Sleep mode marker
+pub struct Sleep;
 
 #[derive(Debug)]
 pub struct Hc12<S, P, D, T>
@@ -135,6 +141,37 @@ where
         }
     }
 
+    pub fn into_sleeping_mode(
+        mut self,
+    ) -> core::result::Result<Hc12<S, P, D, Sleep>, Hc12<S, P, D, Configuration>> {
+        for ch in SLEEP_COMMAND.iter() {
+            let _ = block!(self.serial.write(*ch));
+        }
+        let mut n = 0;
+        let mut response = [0u8; 8];
+        for i in response.iter_mut() {
+            if let Ok(ch) = block!(self.serial.read()) {
+                *i = ch;
+                n += 1;
+                if ch == b'\n' {
+                    break;
+                }
+            }
+        }
+        if n == SLEEP_RESPONSE.len() && response[..n] == SLEEP_RESPONSE[..n] {
+            let _ = self.set_pin.set_high();
+            Ok(Hc12 {
+                delay: self.delay,
+                mode: PhantomData::<Sleep>,
+                parameters: self.parameters,
+                set_pin: self.set_pin,
+                serial: self.serial,
+            })
+        } else {
+            Err(self)
+        }
+    }
+
     pub fn is_ok(&mut self) -> bool {
         for ch in OK_QUERY.iter() {
             let _ = block!(self.serial.write(*ch));
@@ -148,5 +185,40 @@ where
             }
         }
         buffer == OK_RESPONSE
+    }
+
+    pub fn get_version<'a>(&mut self, buffer: &'a mut [u8; 16]) -> &'a [u8] {
+        for ch in VERSION_QUERY.iter() {
+            let _ = block!(self.serial.write(*ch));
+        }
+        let mut len = 0;
+        for (i, v) in buffer.iter_mut().enumerate() {
+            if let Ok(ch) = block!(self.serial.read()) {
+                *v = ch;
+                len = i;
+                if ch == b'\n' {
+                    break;
+                }
+            }
+        }
+        &buffer[..len]
+    }
+
+    pub fn reset_settings(&mut self) -> bool {
+        for ch in RESET_SETTINGS_COMMAND.iter() {
+            let _ = block!(self.serial.write(*ch));
+        }
+        let mut response = [0u8; 12];
+        let mut len = 0;
+        for (i, v) in response.iter_mut().enumerate() {
+            if let Ok(ch) = block!(self.serial.read()) {
+                *v = ch;
+                len = i;
+                if ch == b'\n' {
+                    break;
+                }
+            }
+        }
+        len == RESET_SETTINGS_RESPONSE.len() && response[..len] == RESET_SETTINGS_RESPONSE[..len]
     }
 }
