@@ -24,8 +24,11 @@ pub struct Configuration;
 /// Sleep mode marker
 pub struct Sleep;
 
-type SleepTransition<S, P, D> =
+type ConfigToSleep<S, P, D> =
     core::result::Result<Hc12<S, P, D, Sleep>, Hc12<S, P, D, Configuration>>;
+
+type SleepToConfig<S, P, D> =
+    core::result::Result<Hc12<S, P, D, Configuration>, Hc12<S, P, D, Sleep>>;
 
 #[derive(Debug)]
 pub struct Hc12<S, P, D, T>
@@ -144,12 +147,12 @@ where
         }
     }
 
-    pub fn into_sleeping_mode(mut self) -> SleepTransition<S, P, D> {
+    pub fn into_sleeping_mode(mut self) -> ConfigToSleep<S, P, D> {
         for ch in SLEEP_COMMAND.iter() {
             let _ = block!(self.serial.write(*ch));
         }
         let mut n = 0;
-        let mut response = [0u8; 8];
+        let mut response = [0u8; 10];
         for i in response.iter_mut() {
             if let Ok(ch) = block!(self.serial.read()) {
                 *i = ch;
@@ -222,5 +225,24 @@ where
         }
         count == RESET_SETTINGS_RESPONSE.len()
             && response[..count] == RESET_SETTINGS_RESPONSE[..count]
+    }
+}
+
+impl<S, P, D> Hc12<S, P, D, Sleep>
+where
+    S: Read<u8> + Write<u8>,
+    P: OutputPin,
+    D: DelayMs<u32>,
+{
+    pub fn into_configuration_mode(mut self) -> SleepToConfig<S, P, D> {
+        let _ = self.set_pin.set_low();
+        self.delay.delay_ms(40); // TODO how long?
+        Ok(Hc12 {
+            serial: self.serial,
+            set_pin: self.set_pin,
+            parameters: self.parameters,
+            delay: self.delay,
+            mode: PhantomData::<Configuration>,
+        })
     }
 }
