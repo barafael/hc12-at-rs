@@ -4,6 +4,17 @@ use crate::Error;
 
 use num_derive::{FromPrimitive, ToPrimitive};
 
+pub(crate) const OK_QUERY: [u8; 4] = *b"AT\r\n";
+pub(crate) const OK_RESPONSE: [u8; 4] = *b"OK\r\n";
+
+pub(crate) const SLEEP_COMMAND: [u8; 10] = *b"AT+SLEEP\r\n";
+pub(crate) const SLEEP_RESPONSE: [u8; 10] = *b"OK+SLEEP\r\n";
+
+pub(crate) const RESET_SETTINGS_COMMAND: [u8; 12] = *b"AT+DEFAULT\r\n";
+pub(crate) const RESET_SETTINGS_RESPONSE: [u8; 12] = *b"OK+DEFAULT\r\n";
+
+pub(crate) const VERSION_QUERY: [u8; 6] = *b"AT+V\r\n";
+
 pub trait BaudRataParameter {
     fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error>;
     fn get_baud_rate(&self) -> BaudRate;
@@ -216,14 +227,3 @@ impl Default for Parameters {
         }
     }
 }
-
-pub(crate) const OK_QUERY: [u8; 4] = *b"AT\r\n";
-pub(crate) const OK_RESPONSE: [u8; 4] = *b"OK\r\n";
-
-pub(crate) const SLEEP_COMMAND: [u8; 10] = *b"AT+SLEEP\r\n";
-pub(crate) const SLEEP_RESPONSE: [u8; 10] = *b"OK+SLEEP\r\n";
-
-pub(crate) const RESET_SETTINGS_COMMAND: [u8; 12] = *b"AT+DEFAULT\r\n";
-pub(crate) const RESET_SETTINGS_RESPONSE: [u8; 12] = *b"OK+DEFAULT\r\n";
-
-pub(crate) const VERSION_QUERY: [u8; 6] = *b"AT+V\r\n";

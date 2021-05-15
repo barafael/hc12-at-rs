@@ -24,6 +24,9 @@ pub struct Configuration;
 /// Sleep mode marker
 pub struct Sleep;
 
+type SleepTransition<S, P, D> =
+    core::result::Result<Hc12<S, P, D, Sleep>, Hc12<S, P, D, Configuration>>;
+
 #[derive(Debug)]
 pub struct Hc12<S, P, D, T>
 where
@@ -141,9 +144,7 @@ where
         }
     }
 
-    pub fn into_sleeping_mode(
-        mut self,
-    ) -> core::result::Result<Hc12<S, P, D, Sleep>, Hc12<S, P, D, Configuration>> {
+    pub fn into_sleeping_mode(mut self) -> SleepTransition<S, P, D> {
         for ch in SLEEP_COMMAND.iter() {
             let _ = block!(self.serial.write(*ch));
         }
@@ -191,17 +192,17 @@ where
         for ch in VERSION_QUERY.iter() {
             let _ = block!(self.serial.write(*ch));
         }
-        let mut len = 0;
-        for (i, v) in buffer.iter_mut().enumerate() {
+        let mut count = 0;
+        for v in buffer.iter_mut() {
             if let Ok(ch) = block!(self.serial.read()) {
                 *v = ch;
-                len = i;
+                count += 1;
                 if ch == b'\n' {
                     break;
                 }
             }
         }
-        &buffer[..len]
+        &buffer[..count]
     }
 
     pub fn reset_settings(&mut self) -> bool {
@@ -209,16 +210,17 @@ where
             let _ = block!(self.serial.write(*ch));
         }
         let mut response = [0u8; 12];
-        let mut len = 0;
-        for (i, v) in response.iter_mut().enumerate() {
+        let mut count = 0;
+        for v in response.iter_mut() {
             if let Ok(ch) = block!(self.serial.read()) {
                 *v = ch;
-                len = i;
+                count += 1;
                 if ch == b'\n' {
                     break;
                 }
             }
         }
-        len == RESET_SETTINGS_RESPONSE.len() && response[..len] == RESET_SETTINGS_RESPONSE[..len]
+        count == RESET_SETTINGS_RESPONSE.len()
+            && response[..count] == RESET_SETTINGS_RESPONSE[..count]
     }
 }
