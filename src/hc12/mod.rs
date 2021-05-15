@@ -8,7 +8,7 @@ use embedded_hal::{
 };
 use nb::*;
 
-use crate::config::Parameters;
+use crate::config::{Parameters, OK_QUERY, OK_RESPONSE};
 
 #[cfg(test)]
 mod test;
@@ -136,7 +136,7 @@ where
     }
 
     pub fn is_ok(&mut self) -> bool {
-        for ch in b"AT\r\n".iter() {
+        for ch in OK_QUERY.iter() {
             let _ = block!(self.serial.write(*ch));
         }
         let mut n = 0;
@@ -147,7 +147,7 @@ where
                 n += 1;
             }
         }
-        buffer == *b"OK\r\n"
+        buffer == OK_RESPONSE
     }
 
     pub fn read_params(&mut self) -> Result<Parameters, ()> {

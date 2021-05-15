@@ -34,6 +34,14 @@ fn set_mode_command() {
 }
 
 #[test]
+fn set_power_command() {
+    let mut buffer = [0u8; 16];
+    let power = TransmissionPower(8);
+    let n = power.to_command(&mut buffer);
+    assert_eq!(b"AT+P8\r\n", &buffer[0..n])
+}
+
+#[test]
 fn parse_baudrate() {
     let response = b"OK+B9600\r\n";
     let rate = BaudRate::try_from(&response[..]).unwrap();

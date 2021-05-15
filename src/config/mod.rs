@@ -219,7 +219,7 @@ impl Default for Parameters {
 }
 
 pub(crate) const OK_QUERY: [u8; 4] = *b"AT\r\n";
-pub(crate) const OK_RESPONSE: [u8; 4] = *b"Ok\r\n";
+pub(crate) const OK_RESPONSE: [u8; 4] = *b"OK\r\n";
 pub(crate) const SLEEP_COMMAND: [u8; 10] = *b"AT+SLEEP\r\n";
 pub(crate) const REVISION_QUERY: [u8; 6] = *b"AT+V\r\n";
 pub(crate) const RESET_SETTINGS_COMMAND: [u8; 12] = *b"AT+DEFAULT\r\n";
