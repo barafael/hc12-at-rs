@@ -6,6 +6,7 @@ use num_derive::{FromPrimitive, ToPrimitive};
 
 pub mod command;
 pub mod parser;
+pub mod query;
 
 #[cfg(test)]
 mod test;
