@@ -240,7 +240,7 @@ impl TransmissionPower {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Parameters {
     pub baud_rate: BaudRate,
     pub channel: Channel,

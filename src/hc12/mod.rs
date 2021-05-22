@@ -264,7 +264,7 @@ where
                 if let Ok(ch) = block!(self.serial.read()) {
                     *v = ch;
                     if ch == b'\n' {
-                        param_slices[pi] = &p[..i];
+                        param_slices[pi] = &p[..=i];
                         break;
                     }
                 }

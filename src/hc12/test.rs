@@ -54,6 +54,38 @@ fn get_version() {
 }
 
 #[test]
+fn get_parameters() {
+    let delay = MockNoop;
+    let pin_transactions = [
+        embedded_hal_mock::pin::Transaction::set(State::High),
+        embedded_hal_mock::pin::Transaction::set(State::Low),
+        embedded_hal_mock::pin::Transaction::set(State::High),
+    ];
+    let set_pin = embedded_hal_mock::pin::Mock::new(&pin_transactions);
+    let transactions = [
+        embedded_hal_mock::serial::Transaction::write_many(b"AT+RX\r\n"),
+        embedded_hal_mock::serial::Transaction::read_many(
+            b"OK+FU3\r\nOK+B9600\r\nOK+RC001\r\nOK+RP:+20dBm\r\n",
+        ),
+    ];
+    let serial = embedded_hal_mock::serial::Mock::new(&transactions);
+    let hc12 = Hc12::new(serial, set_pin, delay);
+    let mut hc12 = hc12.into_configuration_mode().debugless_unwrap();
+    let params = hc12.get_parameters().unwrap();
+    let hc12 = hc12.into_normal_mode().debugless_unwrap();
+    let (mut serial, mut set_pin, _) = hc12.release();
+    serial.done();
+    set_pin.done();
+    let expected = Parameters {
+        baud_rate: BaudRate::Bps9600,
+        channel: Channel(1),
+        power: TransmissionPower(8),
+        mode: Mode::Fu3,
+    };
+    assert_eq!(expected, params);
+}
+
+#[test]
 fn reset_to_default() {
     let delay = MockNoop;
     let pin_transactions = [
