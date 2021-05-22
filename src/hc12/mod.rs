@@ -10,8 +10,8 @@ use embedded_hal::{
 use nb::*;
 
 use crate::config::parameters::{
-    OK_QUERY, OK_RESPONSE, RESET_SETTINGS_COMMAND, RESET_SETTINGS_RESPONSE, SLEEP_COMMAND,
-    SLEEP_RESPONSE, VERSION_QUERY,
+    Parameters, OK_QUERY, OK_RESPONSE, QUERY_PARAMS_COMMAND, RESET_SETTINGS_COMMAND,
+    RESET_SETTINGS_RESPONSE, SLEEP_COMMAND, SLEEP_RESPONSE, VERSION_QUERY,
 };
 
 #[cfg(test)]
@@ -84,7 +84,7 @@ where
 
     /// Write entire buffer to serial port
     pub fn write_buffer(&mut self, buffer: &[u8]) -> Result<(), Error<crate::Error>> {
-        for ch in buffer.iter() {
+        for ch in buffer {
             let _ = block!(self.serial.write(*ch));
         }
         Ok(())
@@ -169,12 +169,12 @@ where
 
     /// Move Hc12 in config mode into sleeping mode.
     pub fn into_sleeping_mode(mut self) -> ConfigToSleep<S, P, D> {
-        for ch in SLEEP_COMMAND.iter() {
+        for ch in &SLEEP_COMMAND {
             let _ = block!(self.serial.write(*ch));
         }
         let mut n = 0;
         let mut response = [0u8; 10];
-        for i in response.iter_mut() {
+        for i in &mut response {
             if let Ok(ch) = block!(self.serial.read()) {
                 *i = ch;
                 n += 1;
@@ -198,7 +198,7 @@ where
 
     /// Check if Hc12 responds to "AT" query with "OK".
     pub fn is_ok(&mut self) -> bool {
-        for ch in OK_QUERY.iter() {
+        for ch in &OK_QUERY {
             let _ = block!(self.serial.write(*ch));
         }
         let mut n = 0;
@@ -214,7 +214,7 @@ where
 
     /// Get version as a string from Hc12
     pub fn get_version<'a>(&mut self, buffer: &'a mut [u8; 16]) -> &'a [u8] {
-        for ch in VERSION_QUERY.iter() {
+        for ch in &VERSION_QUERY {
             let _ = block!(self.serial.write(*ch));
         }
         let mut count = 0;
@@ -232,12 +232,12 @@ where
 
     /// Reset Hc12 to default settings.
     pub fn reset_settings(&mut self) -> bool {
-        for ch in RESET_SETTINGS_COMMAND.iter() {
+        for ch in &RESET_SETTINGS_COMMAND {
             let _ = block!(self.serial.write(*ch));
         }
         let mut response = [0u8; 12];
         let mut count = 0;
-        for v in response.iter_mut() {
+        for v in &mut response {
             if let Ok(ch) = block!(self.serial.read()) {
                 *v = ch;
                 count += 1;
@@ -248,6 +248,28 @@ where
         }
         count == RESET_SETTINGS_RESPONSE.len()
             && response[..count] == RESET_SETTINGS_RESPONSE[..count]
+    }
+
+    /// Get parameters of hc-12
+    pub fn get_parameters(&mut self) -> Parameters {
+        for ch in &QUERY_PARAMS_COMMAND {
+            let _ = block!(self.serial.write(*ch));
+        }
+        let mut params = [[0u8; 16]; 4];
+        let mut param_slices: [&[u8]; 4] = Default::default();
+        for (pi, p) in &mut params.iter_mut().enumerate() {
+            for (i, v) in p.iter_mut().enumerate() {
+                if let Ok(ch) = block!(self.serial.read()) {
+                    *v = ch;
+                    if ch == b'\n' {
+                        param_slices[pi] = &p[..i];
+                        break;
+                    }
+                }
+            }
+        }
+
+        Parameters::default()
     }
 }
 

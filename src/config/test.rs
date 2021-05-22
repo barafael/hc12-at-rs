@@ -75,6 +75,19 @@ fn parse_channel() {
 }
 
 #[test]
+fn parse_mode() {
+    let response = b"OK+FU1\r\n";
+    let mode = Mode::Fu1;
+    assert_eq!(Mode::try_from(&response[..]).unwrap(), mode);
+    let response = b"OK+FU2\r\n";
+    let mode = Mode::Fu2;
+    assert_eq!(Mode::try_from(&response[..]).unwrap(), mode);
+    let response = b"OK+FU4\r\n";
+    let mode = Mode::Fu4;
+    assert_eq!(Mode::try_from(&response[..]).unwrap(), mode);
+}
+
+#[test]
 fn query_single_param() {
     let param = Param::BaudRate;
     let mut buffer = [0u8; 16];

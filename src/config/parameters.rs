@@ -7,6 +7,8 @@ use num_derive::{FromPrimitive, ToPrimitive};
 pub(crate) const OK_QUERY: [u8; 4] = *b"AT\r\n";
 pub(crate) const OK_RESPONSE: [u8; 4] = *b"OK\r\n";
 
+pub(crate) const QUERY_PARAMS_COMMAND: [u8; 7] = *b"AT+RX\r\n";
+
 pub(crate) const SLEEP_COMMAND: [u8; 10] = *b"AT+SLEEP\r\n";
 pub(crate) const SLEEP_RESPONSE: [u8; 10] = *b"OK+SLEEP\r\n";
 
@@ -21,7 +23,7 @@ pub trait BaudRataParameter {
     fn get_air_baud_rate(&self) -> AirBaudRate;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Mode {
     Fu1,
     Fu2,

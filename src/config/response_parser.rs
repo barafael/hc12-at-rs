@@ -2,9 +2,9 @@
 
 use core::convert::TryFrom;
 
-use at_commands::parser::CommandParser;
+use at_commands::parser::{CommandParser, ParseError};
 
-use super::parameters::{BaudRate, Channel, Parameters};
+use super::parameters::{BaudRate, Channel, Mode, Parameters};
 
 impl TryFrom<i32> for BaudRate {
     type Error = ();
@@ -25,7 +25,7 @@ impl TryFrom<i32> for BaudRate {
 }
 
 impl TryFrom<&[u8]> for BaudRate {
-    type Error = ();
+    type Error = ParseError;
 
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let result = CommandParser::parse(&value)
@@ -38,10 +38,30 @@ impl TryFrom<&[u8]> for BaudRate {
                 if let Ok(br) = BaudRate::try_from(n.0) {
                     Ok(br)
                 } else {
-                    Err(())
+                    Err(ParseError)
                 }
             }
-            Err(e) => Err(()),
+            Err(e) => Err(e),
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for Mode {
+    type Error = ParseError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        let result = CommandParser::parse(&value)
+            .expect_identifier(b"OK+FU")
+            .expect_int_parameter()
+            .expect_identifier(b"\r\n")
+            .finish();
+        match result {
+            Ok((1,)) => Ok(Mode::Fu1),
+            Ok((2,)) => Ok(Mode::Fu2),
+            Ok((3,)) => Ok(Mode::Fu3),
+            Ok((4,)) => Ok(Mode::Fu4),
+            Ok(_) => Err(ParseError),
+            Err(e) => Err(e),
         }
     }
 }
