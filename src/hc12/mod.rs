@@ -1,5 +1,6 @@
 //! Type-state driven state machine of Hc12.
 
+use core::convert::TryFrom;
 use core::marker::PhantomData;
 
 use embedded_hal::blocking::delay::DelayMs;
@@ -10,8 +11,9 @@ use embedded_hal::{
 use nb::*;
 
 use crate::config::parameters::{
-    Parameters, OK_QUERY, OK_RESPONSE, QUERY_PARAMS_COMMAND, RESET_SETTINGS_COMMAND,
-    RESET_SETTINGS_RESPONSE, SLEEP_COMMAND, SLEEP_RESPONSE, VERSION_QUERY,
+    BaudRate, Channel, Mode, Parameters, TransmissionPower, OK_QUERY, OK_RESPONSE,
+    QUERY_PARAMS_COMMAND, RESET_SETTINGS_COMMAND, RESET_SETTINGS_RESPONSE, SLEEP_COMMAND,
+    SLEEP_RESPONSE, VERSION_QUERY,
 };
 
 #[cfg(test)]
@@ -250,8 +252,8 @@ where
             && response[..count] == RESET_SETTINGS_RESPONSE[..count]
     }
 
-    /// Get parameters of hc-12
-    pub fn get_parameters(&mut self) -> Parameters {
+    /// Get parameters of Hc12
+    pub fn get_parameters(&mut self) -> Option<Parameters> {
         for ch in &QUERY_PARAMS_COMMAND {
             let _ = block!(self.serial.write(*ch));
         }
@@ -268,8 +270,16 @@ where
                 }
             }
         }
-
-        Parameters::default()
+        let mode = Mode::try_from(param_slices[0]).ok()?;
+        let baud_rate = BaudRate::try_from(param_slices[1]).ok()?;
+        let channel = Channel::try_from(param_slices[2]).ok()?;
+        let power = TransmissionPower::try_from(param_slices[3]).ok()?;
+        Some(Parameters {
+            baud_rate,
+            channel,
+            power,
+            mode,
+        })
     }
 }
 

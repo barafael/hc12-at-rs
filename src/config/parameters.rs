@@ -172,12 +172,41 @@ impl Default for BaudRate {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct TransmissionPower(pub(crate) u8);
 
 impl Default for TransmissionPower {
     fn default() -> Self {
         Self(8)
+    }
+}
+
+impl TryFrom<u32> for TransmissionPower {
+    type Error = ();
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            n if n > 0 && n < 9 => Ok(TransmissionPower(n as u8)),
+            _ => Err(()),
+        }
+    }
+}
+
+impl TryFrom<i32> for TransmissionPower {
+    type Error = ();
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        match value {
+            -1 => Ok(TransmissionPower(1)),
+            2 => Ok(TransmissionPower(2)),
+            5 => Ok(TransmissionPower(3)),
+            8 => Ok(TransmissionPower(4)),
+            11 => Ok(TransmissionPower(5)),
+            14 => Ok(TransmissionPower(6)),
+            17 => Ok(TransmissionPower(7)),
+            20 => Ok(TransmissionPower(8)),
+            _ => Err(()),
+        }
     }
 }
 

@@ -9,7 +9,7 @@ embedded-hal-mock = "0.7.2"
 debugless-unwrap = "0.0.4"
 
 [dependencies]
-at-commands = { version = "0.4.0", features = ["parser"] }
+at-commands = { git = "https://github.com/barafael/at-commands", features = ["parser"] }
 embedded-hal = "0.2.5"
 nb = "1.0.0"
 num-traits = "0.2.14"

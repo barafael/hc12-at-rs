@@ -65,13 +65,13 @@ fn parse_baudrate() {
 fn parse_channel() {
     let response = b"OK+RC005\r\n";
     let channel = Channel(5);
-    assert_eq!(Channel::try_from(response).unwrap(), channel);
+    assert_eq!(Channel::try_from(&response[..]).unwrap(), channel);
     let response = b"OK+RC100\r\n";
     let channel = Channel(100);
-    assert_eq!(Channel::try_from(response).unwrap(), channel);
+    assert_eq!(Channel::try_from(&response[..]).unwrap(), channel);
     let response = b"OK+RC099\r\n";
     let channel = Channel(99);
-    assert_eq!(Channel::try_from(response).unwrap(), channel);
+    assert_eq!(Channel::try_from(&response[..]).unwrap(), channel);
 }
 
 #[test]
@@ -85,6 +85,19 @@ fn parse_mode() {
     let response = b"OK+FU4\r\n";
     let mode = Mode::Fu4;
     assert_eq!(Mode::try_from(&response[..]).unwrap(), mode);
+}
+
+#[test]
+fn parse_power() {
+    let response = b"OK+RP:-1dBm\r\n";
+    let power = TransmissionPower(1);
+    assert_eq!(TransmissionPower::try_from(&response[..]).unwrap(), power);
+    let response = b"OK+RP:+20dBm\r\n";
+    let power = TransmissionPower(8);
+    assert_eq!(TransmissionPower::try_from(&response[..]).unwrap(), power);
+    let response = b"OK+RP:+5dBm\r\n";
+    let power = TransmissionPower(3);
+    assert_eq!(TransmissionPower::try_from(&response[..]).unwrap(), power);
 }
 
 #[test]

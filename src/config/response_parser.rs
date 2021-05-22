@@ -4,7 +4,7 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use super::parameters::{BaudRate, Channel, Mode, Parameters};
+use super::parameters::{BaudRate, Channel, Mode, Parameters, TransmissionPower};
 
 impl TryFrom<i32> for BaudRate {
     type Error = ();
@@ -66,10 +66,29 @@ impl TryFrom<&[u8]> for Mode {
     }
 }
 
-impl TryFrom<&[u8; 10]> for Channel {
-    type Error = ();
+impl TryFrom<&[u8]> for TransmissionPower {
+    type Error = ParseError;
 
-    fn try_from(value: &[u8; 10]) -> Result<Self, Self::Error> {
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        let result = CommandParser::parse(value)
+            .expect_identifier(b"OK+RP:")
+            .expect_int_parameter()
+            .expect_identifier(b"dBm\r\n")
+            .finish();
+        match result {
+            Ok(n) => match TransmissionPower::try_from(n.0) {
+                Ok(p) => Ok(p),
+                Err(_) => Err(ParseError),
+            },
+            Err(e) => Err(e),
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for Channel {
+    type Error = ParseError;
+
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let result = CommandParser::parse(value)
             .expect_identifier(b"OK+RC")
             .expect_int_parameter()
@@ -77,10 +96,9 @@ impl TryFrom<&[u8; 10]> for Channel {
             .finish()
             .unwrap();
         let byte: u8 = result.0 as u8; // TODO fallible cast
-        if let Ok(ch) = Channel::try_from(byte) {
-            Ok(ch)
-        } else {
-            Err(())
+        match Channel::try_from(byte) {
+            Ok(ch) => Ok(ch),
+            Err(_) => Err(ParseError),
         }
     }
 }
