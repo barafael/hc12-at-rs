@@ -29,6 +29,38 @@ fn is_ok() {
 }
 
 #[test]
+fn send_buffer() {
+    let delay = MockNoop;
+    let set_pin = embedded_hal_mock::pin::Mock::new(&[Transaction::set(State::High)]);
+    let transactions = [
+        embedded_hal_mock::serial::Transaction::write_many(b"some data AT AT\r\n"),
+    ];
+    let serial = embedded_hal_mock::serial::Mock::new(&transactions);
+    let mut hc12 = Hc12::new(serial, set_pin, delay);
+    hc12.write_buffer(b"some data AT AT\r\n").unwrap();
+    let (mut serial, mut set_pin, _) = hc12.release();
+    serial.done();
+    set_pin.done();
+}
+
+#[test]
+fn receive_buffer() {
+    let delay = MockNoop;
+    let set_pin = embedded_hal_mock::pin::Mock::new(&[Transaction::set(State::High)]);
+    let transactions = [
+        embedded_hal_mock::serial::Transaction::read_many(b"some data AT AT\r\n"),
+    ];
+    let serial = embedded_hal_mock::serial::Mock::new(&transactions);
+    let mut hc12 = Hc12::new(serial, set_pin, delay);
+    let mut buffer = [0u8; 32];
+    hc12.read_buffer(&mut buffer[..17]).unwrap();
+    assert_eq!(&buffer[..17], &b"some data AT AT\r\n"[..]);
+    let (mut serial, mut set_pin, _) = hc12.release();
+    serial.done();
+    set_pin.done();
+}
+
+#[test]
 fn get_version() {
     let delay = MockNoop;
     let pin_transactions = [
