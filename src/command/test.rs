@@ -17,7 +17,7 @@ fn set_baudrate_command() {
 fn set_channel_command() {
     let mut buffer = [0u8; 16];
     for i in 1..128 {
-        let channel = Channel(i);
+        let channel = Channel::new(i).unwrap();
         let c = channel.make_command(&mut buffer);
         assert_eq!(format!("AT+C{:0width$}\r\n", i, width = 3).as_bytes(), c);
     }

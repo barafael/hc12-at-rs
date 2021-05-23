@@ -29,7 +29,13 @@ impl TryFrom<u8> for Channel {
 }
 
 #[derive(Debug, ToPrimitive, FromPrimitive, PartialEq, Eq)]
-pub struct Channel(pub(crate) u8);
+pub struct Channel(u8);
+
+impl Channel {
+    pub fn new(ch: u8) -> Option<Self> {
+        Self::try_from(ch).ok()
+    }
+}
 
 impl Default for Channel {
     fn default() -> Self {

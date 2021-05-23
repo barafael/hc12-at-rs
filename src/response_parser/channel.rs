@@ -14,10 +14,7 @@ impl TryFrom<&[u8]> for Channel {
             .expect_identifier(b"\r\n")
             .finish()
             .unwrap();
-        let byte: u8 = result.0 as u8; // TODO fallible cast
-        match Channel::try_from(byte) {
-            Ok(ch) => Ok(ch),
-            Err(_) => Err(ParseError),
-        }
+        let byte: u8 = result.0 as u8;
+        Channel::try_from(byte).map_err(|_| ParseError)
     }
 }

@@ -106,6 +106,7 @@ mod test {
     };
 
     use num_traits::{FromPrimitive, ToPrimitive};
+
     #[test]
     fn baud_rate_set() {
         let mut params = Parameters::default();
