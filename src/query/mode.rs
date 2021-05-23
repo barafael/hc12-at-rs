@@ -1,4 +1,4 @@
-use crate::config::parameters::Mode;
+use crate::config::mode::Mode;
 
 use super::MakeQuery;
 

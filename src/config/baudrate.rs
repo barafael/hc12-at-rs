@@ -1,7 +1,8 @@
 use crate::Error;
 
-use super::parameters::{Mode, Parameters};
 use num_derive::{FromPrimitive, ToPrimitive};
+
+use super::{mode::Mode, parameters::Parameters};
 
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, FromPrimitive, ToPrimitive)]

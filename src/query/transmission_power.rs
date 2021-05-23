@@ -1,4 +1,4 @@
-use crate::config::parameters::TransmissionPower;
+use crate::config::transmission_power::TransmissionPower;
 
 use super::MakeQuery;
 

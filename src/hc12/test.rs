@@ -1,3 +1,5 @@
+use crate::config::transmission_power::TransmissionPower;
+
 use super::*;
 
 use debugless_unwrap::DebuglessUnwrap;

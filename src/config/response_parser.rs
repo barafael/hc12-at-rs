@@ -5,9 +5,7 @@ use core::convert::TryFrom;
 use at_commands::parser::{CommandParser, ParseError};
 
 use super::{
-    baudrate::BaudRate,
-    channel::Channel,
-    parameters::{Mode, TransmissionPower},
+    baudrate::BaudRate, channel::Channel, mode::Mode, transmission_power::TransmissionPower,
 };
 
 impl TryFrom<i32> for BaudRate {

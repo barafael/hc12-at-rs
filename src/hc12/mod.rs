@@ -11,11 +11,9 @@ use embedded_hal::{
 use nb::*;
 
 use crate::config::{
-    baudrate::BaudRate,
-    channel::Channel,
-    parameters::{Mode, Parameters, TransmissionPower},
-    OK_QUERY, OK_RESPONSE, QUERY_PARAMS_COMMAND, RESET_SETTINGS_COMMAND, RESET_SETTINGS_RESPONSE,
-    SLEEP_COMMAND, SLEEP_RESPONSE, VERSION_QUERY,
+    baudrate::BaudRate, channel::Channel, mode::Mode, parameters::Parameters,
+    transmission_power::TransmissionPower, OK_QUERY, OK_RESPONSE, QUERY_PARAMS_COMMAND,
+    RESET_SETTINGS_COMMAND, RESET_SETTINGS_RESPONSE, SLEEP_COMMAND, SLEEP_RESPONSE, VERSION_QUERY,
 };
 
 #[cfg(test)]

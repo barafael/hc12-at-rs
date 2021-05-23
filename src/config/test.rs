@@ -5,11 +5,13 @@ use crate::{
     config::{
         baudrate::{AirBaudRate, BaudRate, BaudRateParameter},
         channel::Channel,
+        mode::Mode,
+        transmission_power::TransmissionPower,
     },
     query::MakeQuery,
 };
 
-use crate::config::parameters::{Mode, Parameters, TransmissionPower};
+use crate::config::parameters::Parameters;
 
 use num_traits::{FromPrimitive, ToPrimitive};
 
