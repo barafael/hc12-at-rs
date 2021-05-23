@@ -26,15 +26,21 @@ fn set_channel_command() {
 #[test]
 fn set_mode_command() {
     let mut buffer = [0u8; 16];
-    let mode = Mode::Fu1;
-    let c = mode.make_command(&mut buffer);
-    assert_eq!(b"AT+FU1\r\n", c);
+    let modes = [Mode::Fu1, Mode::Fu2, Mode::Fu3, Mode::Fu4];
+    for (index, mode) in modes.iter().enumerate() {
+        let expected = format!("AT+FU{}\r\n", index + 1);
+        let com = mode.make_command(&mut buffer);
+        assert_eq!(expected.as_bytes(), com);
+    }
 }
 
 #[test]
 fn set_power_command() {
     let mut buffer = [0u8; 16];
-    let power = TransmissionPower::new(8).unwrap();
-    let c = power.make_command(&mut buffer);
-    assert_eq!(b"AT+P8\r\n", c);
+    for power in 1..9 {
+        let p = TransmissionPower::new(power).unwrap();
+        let c = p.make_command(&mut buffer);
+        let expected = format!("AT+P{}\r\n", power);
+        assert_eq!(expected.as_bytes(), c);
+    }
 }

@@ -116,6 +116,11 @@ mod test {
         params.set_baud_rate(BaudRate::Bps1200).unwrap();
         assert_eq!(params.baud_rate, BaudRate::Bps1200);
         assert_eq!(params.get_air_baud_rate(), AirBaudRate::Bps250000);
+
+        params.mode = Mode::Fu2;
+        params.set_baud_rate(BaudRate::Bps1200).unwrap();
+
+        assert!(params.set_baud_rate(BaudRate::Bps115200).is_err());
     }
 
     #[test]
