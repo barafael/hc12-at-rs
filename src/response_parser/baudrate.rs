@@ -2,7 +2,7 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use crate::config::baudrate::BaudRate;
+use crate::parameter::baudrate::BaudRate;
 
 impl TryFrom<i32> for BaudRate {
     type Error = ();

@@ -2,7 +2,7 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use crate::config::transmission_power::TransmissionPower;
+use crate::parameter::transmission_power::TransmissionPower;
 
 impl TryFrom<&[u8]> for TransmissionPower {
     type Error = ParseError;

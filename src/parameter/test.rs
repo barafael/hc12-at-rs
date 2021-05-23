@@ -2,7 +2,7 @@ use core::convert::TryFrom;
 
 use crate::{
     command::*,
-    config::{
+    parameter::{
         baudrate::{AirBaudRate, BaudRate, BaudRateParameter},
         channel::Channel,
         mode::Mode,
@@ -11,7 +11,7 @@ use crate::{
     query::MakeQuery,
 };
 
-use crate::config::parameters::Parameters;
+use crate::parameter::parameters::Parameters;
 
 use num_traits::{FromPrimitive, ToPrimitive};
 

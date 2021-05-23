@@ -6,7 +6,7 @@
 #![deny(missing_docs)]
 
 /// Configuration data structures
-mod config;
+mod parameter;
 
 /// Hc12 driver
 pub mod hc12;

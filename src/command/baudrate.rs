@@ -1,6 +1,6 @@
 use at_commands::builder::CommandBuilder;
 
-use crate::config::baudrate::BaudRate;
+use crate::parameter::baudrate::BaudRate;
 
 use super::MakeCommand;
 

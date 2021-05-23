@@ -2,7 +2,7 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use crate::config::mode::Mode;
+use crate::parameter::mode::Mode;
 
 impl TryFrom<&[u8]> for Mode {
     type Error = ParseError;
