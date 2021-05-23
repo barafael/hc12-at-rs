@@ -14,6 +14,9 @@ pub mod hc12;
 /// Command datastructures
 pub mod command;
 
+/// Query datastructures
+pub mod query;
+
 /// Crate error
 #[derive(Debug)]
 pub enum Error {

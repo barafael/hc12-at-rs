@@ -1,12 +1,10 @@
 use core::convert::TryFrom;
 
-use crate::command::*;
+use crate::{command::*, query::ToQuery};
 
 use crate::config::parameters::{
     AirBaudRate, BaudRataParameter, BaudRate, Channel, Mode, Parameters, TransmissionPower,
 };
-
-use super::query::{Param, ToQuery};
 
 use num_traits::{FromPrimitive, ToPrimitive};
 
@@ -101,18 +99,14 @@ fn parse_power() {
 
 #[test]
 fn query_single_param() {
-    let param = Param::BaudRate;
     let mut buffer = [0u8; 16];
-    let n = param.to_query(&mut buffer);
+    let n = BaudRate::to_query(&mut buffer);
     assert_eq!(b"AT+RB\r\n", &buffer[..n]);
-    let param = Param::Channel;
-    let n = param.to_query(&mut buffer);
+    let n = Channel::to_query(&mut buffer);
     assert_eq!(b"AT+RC\r\n", &buffer[..n]);
-    let param = Param::Mode;
-    let n = param.to_query(&mut buffer);
+    let n = Mode::to_query(&mut buffer);
     assert_eq!(b"AT+RF\r\n", &buffer[..n]);
-    let param = Param::Power;
-    let n = param.to_query(&mut buffer);
+    let n = TransmissionPower::to_query(&mut buffer);
     assert_eq!(b"AT+RP\r\n", &buffer[..n]);
 }
 

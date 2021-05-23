@@ -4,7 +4,7 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use super::parameters::{BaudRate, Channel, Mode, Parameters, TransmissionPower};
+use super::parameters::{BaudRate, Channel, Mode, TransmissionPower};
 
 impl TryFrom<i32> for BaudRate {
     type Error = ();
@@ -100,13 +100,5 @@ impl TryFrom<&[u8]> for Channel {
             Ok(ch) => Ok(ch),
             Err(_) => Err(ParseError),
         }
-    }
-}
-
-impl TryFrom<&[u8]> for Parameters {
-    type Error = ();
-
-    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
-        Ok(Parameters::default())
     }
 }
