@@ -34,7 +34,7 @@ fn set_mode_command() {
 #[test]
 fn set_power_command() {
     let mut buffer = [0u8; 16];
-    let power = TransmissionPower(8);
+    let power = TransmissionPower::new(8).unwrap();
     let c = power.make_command(&mut buffer);
     assert_eq!(b"AT+P8\r\n", c);
 }

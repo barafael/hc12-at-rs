@@ -61,13 +61,13 @@ fn parse_mode_error() {
 #[test]
 fn parse_power() {
     let response = b"OK+RP:-1dBm\r\n";
-    let power = TransmissionPower(1);
+    let power = TransmissionPower::new(1).unwrap();
     assert_eq!(TransmissionPower::try_from(&response[..]).unwrap(), power);
     let response = b"OK+RP:+20dBm\r\n";
-    let power = TransmissionPower(8);
+    let power = TransmissionPower::new(8).unwrap();
     assert_eq!(TransmissionPower::try_from(&response[..]).unwrap(), power);
     let response = b"OK+RP:+5dBm\r\n";
-    let power = TransmissionPower(3);
+    let power = TransmissionPower::new(3).unwrap();
     assert_eq!(TransmissionPower::try_from(&response[..]).unwrap(), power);
 }
 

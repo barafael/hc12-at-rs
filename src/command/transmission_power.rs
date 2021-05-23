@@ -4,7 +4,7 @@ use super::MakeCommand;
 
 impl MakeCommand for TransmissionPower {
     fn make_command<'a>(&self, buffer: &'a mut [u8; 16]) -> &'a [u8] {
-        match self.0 {
+        match self.power() {
             1 => {
                 buffer[..7].copy_from_slice(b"AT+P1\r\n");
             }

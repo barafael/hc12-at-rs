@@ -1,7 +1,17 @@
 use core::convert::TryFrom;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct TransmissionPower(pub(crate) u8);
+pub struct TransmissionPower(u8);
+
+impl TransmissionPower {
+    pub fn new(p: u8) -> Option<Self> {
+        TransmissionPower::try_from(p as u32).ok()
+    }
+
+    pub fn power(&self) -> u8 {
+        self.0
+    }
+}
 
 impl Default for TransmissionPower {
     fn default() -> Self {

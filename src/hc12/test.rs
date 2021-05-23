@@ -92,7 +92,7 @@ fn usage_from_readme() {
         Parameters {
             baud_rate: BaudRate::Bps115200,
             channel: Channel::new(42).unwrap(),
-            power: TransmissionPower(1),
+            power: TransmissionPower::new(1).unwrap(),
             mode: Mode::Fu2,
         },
         params
@@ -156,7 +156,7 @@ fn get_parameters() {
     let expected = Parameters {
         baud_rate: BaudRate::Bps9600,
         channel: Channel::new(1).unwrap(),
-        power: TransmissionPower(8),
+        power: TransmissionPower::new(8).unwrap(),
         mode: Mode::Fu3,
     };
     assert_eq!(expected, params);
@@ -186,7 +186,7 @@ fn get_more_parameters() {
     let expected = Parameters {
         baud_rate: BaudRate::Bps115200,
         channel: Channel::new(101).unwrap(),
-        power: TransmissionPower(1),
+        power: TransmissionPower::new(1).unwrap(),
         mode: Mode::Fu1,
     };
     assert_eq!(expected, params);
