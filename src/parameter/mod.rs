@@ -4,9 +4,6 @@ pub mod mode;
 pub mod parameters;
 pub mod transmission_power;
 
-#[cfg(test)]
-mod test;
-
 pub(crate) const OK_QUERY: [u8; 4] = *b"AT\r\n";
 pub(crate) const OK_RESPONSE: [u8; 4] = *b"OK\r\n";
 

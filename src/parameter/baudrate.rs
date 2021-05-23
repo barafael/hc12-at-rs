@@ -1,3 +1,5 @@
+use core::convert::TryFrom;
+
 use crate::Error;
 
 use num_derive::{FromPrimitive, ToPrimitive};
@@ -29,6 +31,24 @@ pub enum AirBaudRate {
 impl Default for BaudRate {
     fn default() -> Self {
         BaudRate::Bps9600
+    }
+}
+
+impl TryFrom<i32> for BaudRate {
+    type Error = ();
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        match value {
+            1200 => Ok(BaudRate::Bps1200),
+            2400 => Ok(BaudRate::Bps2400),
+            4800 => Ok(BaudRate::Bps4800),
+            9600 => Ok(BaudRate::Bps9600),
+            19200 => Ok(BaudRate::Bps19200),
+            38400 => Ok(BaudRate::Bps38400),
+            57600 => Ok(BaudRate::Bps57600),
+            115200 => Ok(BaudRate::Bps115200),
+            _ => Err(()),
+        }
     }
 }
 
@@ -87,22 +107,27 @@ impl BaudRateParameter for Parameters {
     }
 }
 
-pub fn get_wireless_sensitivity_dbm(air_rate: AirBaudRate) -> i32 {
-    match air_rate {
-        AirBaudRate::Bps5000 => -117,
-        AirBaudRate::Bps15000 => -117,
-        AirBaudRate::Bps58000 => -112,
-        AirBaudRate::Bps236000 => -100,
-        AirBaudRate::Bps250000 => -100, // TODO Datasheet doesn't say; extrapolate?
+impl AirBaudRate {
+    pub fn get_wireless_sensitivity_dbm(&self) -> i32 {
+        match self {
+            AirBaudRate::Bps5000 => -117,
+            AirBaudRate::Bps15000 => -117,
+            AirBaudRate::Bps58000 => -112,
+            AirBaudRate::Bps236000 => -100,
+            AirBaudRate::Bps250000 => -100, // TODO Datasheet doesn't say; extrapolate?
+        }
     }
 }
 
 #[cfg(test)]
 mod test {
+    use core::convert::TryFrom;
+
     use crate::parameter::{
         baudrate::{AirBaudRate, BaudRate, BaudRateParameter},
         mode::Mode,
         parameters::Parameters,
+        transmission_power::TransmissionPower,
     };
 
     use num_traits::{FromPrimitive, ToPrimitive};
@@ -145,5 +170,97 @@ mod test {
         assert_eq!(BaudRate::Bps38400, BaudRate::from_u32(38400).unwrap());
         assert_eq!(BaudRate::Bps57600, BaudRate::from_u32(57600).unwrap());
         assert_eq!(BaudRate::Bps115200, BaudRate::from_u32(115200).unwrap());
+    }
+
+    #[test]
+    fn parse_baudrate_from_i32() {
+        let baudrates = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200];
+        let expected = [
+            BaudRate::Bps1200,
+            BaudRate::Bps2400,
+            BaudRate::Bps4800,
+            BaudRate::Bps9600,
+            BaudRate::Bps19200,
+            BaudRate::Bps38400,
+            BaudRate::Bps57600,
+            BaudRate::Bps115200,
+        ];
+        let result: Vec<BaudRate> = baudrates
+            .iter()
+            .map(|x| BaudRate::try_from(*x).unwrap())
+            .collect();
+        assert_eq!(&expected, &result[..]);
+    }
+
+    #[test]
+    fn get_air_baud_rate() {
+        let air_rates = [
+            AirBaudRate::Bps5000,
+            AirBaudRate::Bps5000,
+            AirBaudRate::Bps15000,
+            AirBaudRate::Bps15000,
+            AirBaudRate::Bps58000,
+            AirBaudRate::Bps58000,
+            AirBaudRate::Bps236000,
+            AirBaudRate::Bps236000,
+        ];
+
+        let rates = [
+            BaudRate::Bps1200,
+            BaudRate::Bps2400,
+            BaudRate::Bps4800,
+            BaudRate::Bps9600,
+            BaudRate::Bps19200,
+            BaudRate::Bps38400,
+            BaudRate::Bps57600,
+            BaudRate::Bps115200,
+        ];
+
+        let mut params = Parameters::default();
+
+        for (r, a) in rates.iter().zip(air_rates.iter()) {
+            params.baud_rate = *r;
+            assert_eq!(*a, params.get_air_baud_rate());
+        }
+    }
+
+    #[test]
+    fn air_baudrate_fu2() {
+        let mut params = Parameters::default();
+        params.mode = Mode::Fu2;
+
+        assert_eq!(AirBaudRate::Bps250000, params.get_air_baud_rate());
+    }
+
+    #[test]
+    fn get_wireless_sensitivity_dbm() {
+        let rate = AirBaudRate::Bps5000;
+        assert_eq!(-117, rate.get_wireless_sensitivity_dbm());
+        let rate = AirBaudRate::Bps15000;
+        assert_eq!(-117, rate.get_wireless_sensitivity_dbm());
+        let rate = AirBaudRate::Bps58000;
+        assert_eq!(-112, rate.get_wireless_sensitivity_dbm());
+        let rate = AirBaudRate::Bps236000;
+        assert_eq!(-100, rate.get_wireless_sensitivity_dbm());
+        let rate = AirBaudRate::Bps250000;
+        assert_eq!(-100, rate.get_wireless_sensitivity_dbm());
+    }
+
+    #[test]
+    fn get_power_dbm() {
+        let dbm = [-1, 2, 5, 8, 11, 14, 17, 20];
+        for (i, dbm) in dbm.iter().enumerate() {
+            let power = TransmissionPower::new((i + 1) as u8).unwrap();
+            assert_eq!(power.get_power_dbm(), *dbm);
+        }
+    }
+
+    #[test]
+    fn get_power_milliwatt() {
+        let m_w = [0.79, 1.58, 3.16, 6.31, 12.59, 25.12, 50.12, 100.0];
+        for (i, m_w) in m_w.iter().enumerate() {
+            let power = TransmissionPower::new((i + 1) as u8).unwrap();
+            assert_eq!(power.get_power_milliwatt(), *m_w);
+        }
     }
 }

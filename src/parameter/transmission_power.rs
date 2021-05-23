@@ -77,3 +77,21 @@ impl TransmissionPower {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use core::convert::TryFrom;
+
+    use crate::parameter::transmission_power::TransmissionPower;
+
+    #[test]
+    fn parse_power_from_i32() {
+        let dbm = [-1, 2, 5, 8, 11, 14, 17, 20];
+
+        for (i, dbm) in dbm.iter().enumerate() {
+            let expected = TransmissionPower::new((i as u8) + 1).unwrap();
+            let power = TransmissionPower::try_from(*dbm).unwrap();
+            assert_eq!(expected, power);
+        }
+    }
+}
