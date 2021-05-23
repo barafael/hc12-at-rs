@@ -1,10 +1,9 @@
 use core::convert::TryFrom;
 
-use crate::config::{
-    command::ToCommand,
-    parameters::{
-        AirBaudRate, BaudRataParameter, BaudRate, Channel, Mode, Parameters, TransmissionPower,
-    },
+use crate::command::*;
+
+use crate::config::parameters::{
+    AirBaudRate, BaudRataParameter, BaudRate, Channel, Mode, Parameters, TransmissionPower,
 };
 
 use super::query::{Param, ToQuery};

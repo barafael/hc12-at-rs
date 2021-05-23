@@ -11,6 +11,9 @@ mod config;
 /// Hc12 driver
 pub mod hc12;
 
+/// Command datastructures
+pub mod command;
+
 /// Crate error
 #[derive(Debug)]
 pub enum Error {
