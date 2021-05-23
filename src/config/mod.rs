@@ -2,7 +2,6 @@ pub mod baudrate;
 pub mod channel;
 pub mod mode;
 pub mod parameters;
-pub mod response_parser;
 pub mod transmission_power;
 
 #[cfg(test)]
