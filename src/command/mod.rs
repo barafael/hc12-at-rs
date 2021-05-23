@@ -10,8 +10,3 @@ pub trait ToCommand {
     /// populate given buffer and return the size taken (0 if failed) TODO return slice
     fn to_command(&self, buffer: &mut [u8; 16]) -> usize;
 }
-
-
-
-
-
