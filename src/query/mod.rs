@@ -3,6 +3,9 @@ pub(crate) mod channel;
 pub(crate) mod mode;
 pub(crate) mod transmission_power;
 
+#[cfg(test)]
+mod test;
+
 /// Convert a T to an AT query for it
 pub trait MakeQuery {
     /// Fill the buffer with the query and return the size (0 if failure). TODO return optional slice.

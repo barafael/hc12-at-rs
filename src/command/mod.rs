@@ -5,6 +5,9 @@ pub(crate) mod channel;
 pub(crate) mod mode;
 pub(crate) mod transmission_power;
 
+#[cfg(test)]
+mod test;
+
 /// Convert a type to an AT command
 pub trait MakeCommand {
     /// populate given buffer and return the size taken (0 if failed) TODO return slice

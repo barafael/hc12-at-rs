@@ -96,3 +96,48 @@ pub fn get_wireless_sensitivity_dbm(air_rate: AirBaudRate) -> i32 {
         AirBaudRate::Bps250000 => -100, // TODO Datasheet doesn't say; extrapolate?
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::parameter::{
+        baudrate::{AirBaudRate, BaudRate, BaudRateParameter},
+        mode::Mode,
+        parameters::Parameters,
+    };
+
+    use num_traits::{FromPrimitive, ToPrimitive};
+    #[test]
+    fn baud_rate_set() {
+        let mut params = Parameters::default();
+        params.set_baud_rate(BaudRate::Bps115200).unwrap();
+        assert_eq!(params.baud_rate, BaudRate::Bps115200);
+        params.mode = Mode::Fu1;
+        params.set_baud_rate(BaudRate::Bps1200).unwrap();
+        assert_eq!(params.baud_rate, BaudRate::Bps1200);
+        assert_eq!(params.get_air_baud_rate(), AirBaudRate::Bps250000);
+    }
+
+    #[test]
+    fn baud_rate_to_primitive() {
+        assert_eq!(1200, BaudRate::Bps1200.to_u32().unwrap());
+        assert_eq!(2400, BaudRate::Bps2400.to_u32().unwrap());
+        assert_eq!(4800, BaudRate::Bps4800.to_u32().unwrap());
+        assert_eq!(9600, BaudRate::Bps9600.to_u32().unwrap());
+        assert_eq!(19200, BaudRate::Bps19200.to_u32().unwrap());
+        assert_eq!(38400, BaudRate::Bps38400.to_u32().unwrap());
+        assert_eq!(57600, BaudRate::Bps57600.to_u32().unwrap());
+        assert_eq!(115200, BaudRate::Bps115200.to_u32().unwrap());
+    }
+
+    #[test]
+    fn baud_rate_from_primitive() {
+        assert_eq!(BaudRate::Bps1200, BaudRate::from_u32(1200).unwrap());
+        assert_eq!(BaudRate::Bps2400, BaudRate::from_u32(2400).unwrap());
+        assert_eq!(BaudRate::Bps4800, BaudRate::from_u32(4800).unwrap());
+        assert_eq!(BaudRate::Bps9600, BaudRate::from_u32(9600).unwrap());
+        assert_eq!(BaudRate::Bps19200, BaudRate::from_u32(19200).unwrap());
+        assert_eq!(BaudRate::Bps38400, BaudRate::from_u32(38400).unwrap());
+        assert_eq!(BaudRate::Bps57600, BaudRate::from_u32(57600).unwrap());
+        assert_eq!(BaudRate::Bps115200, BaudRate::from_u32(115200).unwrap());
+    }
+}

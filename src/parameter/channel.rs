@@ -51,3 +51,35 @@ impl Channel {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::parameter::channel::Channel;
+
+    #[test]
+    fn test_channel_get_freq_default() {
+        let chan = Channel::default();
+        assert_eq!(433.4f32, chan.get_freq_mhz());
+    }
+
+    #[test]
+    fn test_channel_get_freq_100() {
+        let chan = Channel(100);
+        assert_eq!(473.0f32, chan.get_freq_mhz());
+    }
+
+    #[test]
+    fn test_channel_get_freq_21() {
+        let chan = Channel(21);
+        assert_eq!(441.4f32, chan.get_freq_mhz());
+    }
+
+    #[test]
+    fn test_channel_invalid_channel() {
+        let mut chan = Channel::default();
+        assert!(chan.set_channel(0).is_err());
+        assert!(chan.set_channel(89).is_ok());
+        assert!(chan.set_channel(128).is_err());
+        assert!(chan.set_channel(200).is_err());
+    }
+}
