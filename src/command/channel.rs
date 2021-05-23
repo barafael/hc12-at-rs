@@ -8,17 +8,16 @@ use super::MakeCommand;
 use num_traits::ToPrimitive;
 
 impl MakeCommand for Channel {
-    fn make_command(&self, buffer: &mut [u8; 16]) -> usize {
+    fn make_command<'a>(&self, buffer: &'a mut [u8; 16]) -> &'a [u8] {
         let mut format_buf = [0u8; 5];
         let num: [u8; 3] = self.into();
         format_buf[0..2].copy_from_slice(b"+C");
         format_buf[2..5].copy_from_slice(&num);
         let command = core::str::from_utf8(&format_buf[..2 + num.len()]).unwrap();
-        let result = CommandBuilder::create_execute(buffer, true)
+        CommandBuilder::create_execute(buffer, true)
             .named(command)
             .finish()
-            .unwrap();
-        result.len()
+            .unwrap()
     }
 }
 

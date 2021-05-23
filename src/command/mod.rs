@@ -10,6 +10,6 @@ mod test;
 
 /// Convert a type to an AT command
 pub trait MakeCommand {
-    /// populate given buffer and return the size taken (0 if failed) TODO return slice
-    fn make_command(&self, buffer: &mut [u8; 16]) -> usize;
+    /// Set buffer to command for hc12
+    fn make_command<'a>(&self, buffer: &'a mut [u8; 16]) -> &'a [u8];
 }

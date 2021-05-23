@@ -3,7 +3,7 @@ use crate::parameter::transmission_power::TransmissionPower;
 use super::MakeCommand;
 
 impl MakeCommand for TransmissionPower {
-    fn make_command(&self, buffer: &mut [u8; 16]) -> usize {
+    fn make_command<'a>(&self, buffer: &'a mut [u8; 16]) -> &'a [u8] {
         match self.0 {
             1 => {
                 buffer[..7].copy_from_slice(b"AT+P1\r\n");
@@ -31,6 +31,6 @@ impl MakeCommand for TransmissionPower {
             }
             _ => unreachable!(),
         }
-        7
+        &buffer[..7]
     }
 }
