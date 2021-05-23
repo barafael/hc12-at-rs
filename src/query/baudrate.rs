@@ -1,9 +1,9 @@
-use crate::config::parameters::BaudRate;
+use crate::config::baudrate::BaudRate;
 
-use super::ToQuery;
+use super::MakeQuery;
 
-impl ToQuery for BaudRate {
-    fn to_query(buffer: &mut [u8; 16]) -> usize {
+impl MakeQuery for BaudRate {
+    fn make_query(buffer: &mut [u8; 16]) -> usize {
         buffer[..7].copy_from_slice(b"AT+RB\r\n");
         7
     }

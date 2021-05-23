@@ -1,9 +1,9 @@
 use crate::config::parameters::Mode;
 
-use super::ToCommand;
+use super::MakeCommand;
 
-impl ToCommand for Mode {
-    fn to_command(&self, buffer: &mut [u8; 16]) -> usize {
+impl MakeCommand for Mode {
+    fn make_command(&self, buffer: &mut [u8; 16]) -> usize {
         match self {
             Mode::Fu1 => {
                 buffer[0..8].copy_from_slice(b"AT+FU1\r\n");

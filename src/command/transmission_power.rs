@@ -1,9 +1,9 @@
 use crate::config::parameters::TransmissionPower;
 
-use super::ToCommand;
+use super::MakeCommand;
 
-impl ToCommand for TransmissionPower {
-    fn to_command(&self, buffer: &mut [u8; 16]) -> usize {
+impl MakeCommand for TransmissionPower {
+    fn make_command(&self, buffer: &mut [u8; 16]) -> usize {
         match self.0 {
             1 => {
                 buffer[..7].copy_from_slice(b"AT+P1\r\n");

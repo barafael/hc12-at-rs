@@ -1,9 +1,9 @@
-use crate::config::parameters::Channel;
+use crate::config::channel::Channel;
 
-use super::ToQuery;
+use super::MakeQuery;
 
-impl ToQuery for Channel {
-    fn to_query(buffer: &mut [u8; 16]) -> usize {
+impl MakeQuery for Channel {
+    fn make_query(buffer: &mut [u8; 16]) -> usize {
         buffer[..7].copy_from_slice(b"AT+RC\r\n");
         7
     }

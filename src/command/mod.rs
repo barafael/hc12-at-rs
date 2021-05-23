@@ -6,7 +6,7 @@ pub(crate) mod mode;
 pub(crate) mod transmission_power;
 
 /// Convert a type to an AT command
-pub trait ToCommand {
+pub trait MakeCommand {
     /// populate given buffer and return the size taken (0 if failed) TODO return slice
-    fn to_command(&self, buffer: &mut [u8; 16]) -> usize;
+    fn make_command(&self, buffer: &mut [u8; 16]) -> usize;
 }

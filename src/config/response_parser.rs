@@ -4,7 +4,11 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use super::parameters::{BaudRate, Channel, Mode, TransmissionPower};
+use super::{
+    baudrate::BaudRate,
+    channel::Channel,
+    parameters::{Mode, TransmissionPower},
+};
 
 impl TryFrom<i32> for BaudRate {
     type Error = ();

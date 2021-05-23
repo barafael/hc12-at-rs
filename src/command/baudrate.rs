@@ -1,8 +1,8 @@
 use at_commands::builder::CommandBuilder;
 
-use crate::config::parameters::BaudRate;
+use crate::config::baudrate::BaudRate;
 
-use super::ToCommand;
+use super::MakeCommand;
 
 impl From<&BaudRate> for &[u8] {
     fn from(r: &BaudRate) -> Self {
@@ -19,8 +19,8 @@ impl From<&BaudRate> for &[u8] {
     }
 }
 
-impl ToCommand for BaudRate {
-    fn to_command(&self, buffer: &mut [u8; 16]) -> usize {
+impl MakeCommand for BaudRate {
+    fn make_command(&self, buffer: &mut [u8; 16]) -> usize {
         let mut format_buf = [0u8; 8];
         let num: &[u8] = self.into();
         format_buf[0..2].copy_from_slice(b"+B");

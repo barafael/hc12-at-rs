@@ -1,10 +1,15 @@
 use core::convert::TryFrom;
 
-use crate::{command::*, query::ToQuery};
-
-use crate::config::parameters::{
-    AirBaudRate, BaudRataParameter, BaudRate, Channel, Mode, Parameters, TransmissionPower,
+use crate::{
+    command::*,
+    config::{
+        baudrate::{AirBaudRate, BaudRate, BaudRateParameter},
+        channel::Channel,
+    },
+    query::MakeQuery,
 };
+
+use crate::config::parameters::{Mode, Parameters, TransmissionPower};
 
 use num_traits::{FromPrimitive, ToPrimitive};
 
@@ -12,7 +17,7 @@ use num_traits::{FromPrimitive, ToPrimitive};
 fn set_baudrate_command() {
     let mut buffer = [0u8; 16];
     let baudrate = BaudRate::Bps115200;
-    let n = baudrate.to_command(&mut buffer);
+    let n = baudrate.make_command(&mut buffer);
     assert_eq!(b"AT+B115200\r\n", &buffer[0..n])
 }
 
@@ -21,7 +26,7 @@ fn set_channel_command() {
     let mut buffer = [0u8; 16];
     for i in 1..128 {
         let channel = Channel(i);
-        let n = channel.to_command(&mut buffer);
+        let n = channel.make_command(&mut buffer);
         assert_eq!(
             format!("AT+C{:0width$}\r\n", i, width = 3).as_bytes(),
             &buffer[0..n]
@@ -33,7 +38,7 @@ fn set_channel_command() {
 fn set_mode_command() {
     let mut buffer = [0u8; 16];
     let mode = Mode::Fu1;
-    let n = mode.to_command(&mut buffer);
+    let n = mode.make_command(&mut buffer);
     assert_eq!(b"AT+FU1\r\n", &buffer[0..n])
 }
 
@@ -41,7 +46,7 @@ fn set_mode_command() {
 fn set_power_command() {
     let mut buffer = [0u8; 16];
     let power = TransmissionPower(8);
-    let n = power.to_command(&mut buffer);
+    let n = power.make_command(&mut buffer);
     assert_eq!(b"AT+P8\r\n", &buffer[0..n])
 }
 
@@ -100,13 +105,13 @@ fn parse_power() {
 #[test]
 fn query_single_param() {
     let mut buffer = [0u8; 16];
-    let n = BaudRate::to_query(&mut buffer);
+    let n = BaudRate::make_query(&mut buffer);
     assert_eq!(b"AT+RB\r\n", &buffer[..n]);
-    let n = Channel::to_query(&mut buffer);
+    let n = Channel::make_query(&mut buffer);
     assert_eq!(b"AT+RC\r\n", &buffer[..n]);
-    let n = Mode::to_query(&mut buffer);
+    let n = Mode::make_query(&mut buffer);
     assert_eq!(b"AT+RF\r\n", &buffer[..n]);
-    let n = TransmissionPower::to_query(&mut buffer);
+    let n = TransmissionPower::make_query(&mut buffer);
     assert_eq!(b"AT+RP\r\n", &buffer[..n]);
 }
 

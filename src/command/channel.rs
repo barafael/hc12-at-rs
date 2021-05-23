@@ -1,13 +1,14 @@
 use at_commands::builder::CommandBuilder;
 use core::convert::TryInto;
+
+use crate::config::channel::Channel;
+
+use super::MakeCommand;
+
 use num_traits::ToPrimitive;
 
-use crate::config::parameters::Channel;
-
-use super::ToCommand;
-
-impl ToCommand for Channel {
-    fn to_command(&self, buffer: &mut [u8; 16]) -> usize {
+impl MakeCommand for Channel {
+    fn make_command(&self, buffer: &mut [u8; 16]) -> usize {
         let mut format_buf = [0u8; 5];
         let num: [u8; 3] = self.into();
         format_buf[0..2].copy_from_slice(b"+C");
