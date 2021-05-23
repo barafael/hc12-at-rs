@@ -6,8 +6,8 @@ pub(crate) mod transmission_power;
 #[cfg(test)]
 mod test;
 
-/// Convert a T to an AT query for it
+/// Make an AT query
 pub trait MakeQuery {
-    /// Fill the buffer with the query and return the size (0 if failure). TODO return optional slice.
-    fn make_query(buffer: &mut [u8; 16]) -> usize;
+    /// Return the AT query of this type
+    fn make_query(buffer: &mut [u8; 7]);
 }
