@@ -27,8 +27,6 @@ pub enum Error {
     Read,
     /// Write error
     Write,
-    /// Invalid channel
-    InvalidChannel(u8),
     /// Invalid baud rate
     InvalidBaudRate,
 }
