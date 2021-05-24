@@ -1,6 +1,9 @@
-use crate::{settings::{command::MakeCommand, parameter::{
+use crate::settings::{
+    command::MakeCommand,
+    parameter::{
         baudrate::BaudRate, channel::Channel, mode::Mode, transmission_power::TransmissionPower,
-    }}};
+    },
+};
 
 #[test]
 fn set_baudrate_command() {

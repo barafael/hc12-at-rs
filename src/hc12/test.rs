@@ -79,7 +79,7 @@ fn usage_from_readme() {
     let hc12 = Hc12::new(serial, set_pin, delay);
     let mut hc12 = hc12.into_configuration_mode().debugless_unwrap();
 
-    let mut buffer = [0u8; 16];
+    let mut buffer = [0u8; 64];
 
     let ok = hc12.is_ok();
     assert!(ok);
@@ -123,7 +123,7 @@ fn get_version() {
     let serial = serial::Mock::new(&transactions);
     let hc12 = Hc12::new(serial, set_pin, delay);
     let mut hc12 = hc12.into_configuration_mode().debugless_unwrap();
-    let mut buffer = [0u8; 16];
+    let mut buffer = [0u8; 64];
     let result = hc12.get_version(&mut buffer);
     assert_eq!(result, b"HC-12_VFAKE\r\n");
     let hc12 = hc12.into_normal_mode().debugless_unwrap();

@@ -215,7 +215,7 @@ where
     }
 
     /// Get version as a string from Hc12
-    pub fn get_version<'a>(&mut self, buffer: &'a mut [u8; 16]) -> &'a [u8] {
+    pub fn get_version<'a>(&mut self, buffer: &'a mut [u8; 64]) -> &'a [u8] {
         for ch in &VERSION_QUERY {
             let _ = block!(self.serial.write(*ch));
         }
