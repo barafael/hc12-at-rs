@@ -2,23 +2,25 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use crate::parameter::mode::Mode;
+use crate::settings::parameter::baudrate::BaudRate;
 
-impl TryFrom<&[u8]> for Mode {
+impl TryFrom<&[u8]> for BaudRate {
     type Error = ParseError;
 
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         let result = CommandParser::parse(&value)
-            .expect_identifier(b"OK+FU")
+            .expect_identifier(b"OK+B")
             .expect_int_parameter()
             .expect_identifier(b"\r\n")
             .finish();
         match result {
-            Ok((1,)) => Ok(Mode::Fu1),
-            Ok((2,)) => Ok(Mode::Fu2),
-            Ok((3,)) => Ok(Mode::Fu3),
-            Ok((4,)) => Ok(Mode::Fu4),
-            Ok(_) => Err(ParseError),
+            Ok(n) => {
+                if let Ok(br) = BaudRate::try_from(n.0) {
+                    Ok(br)
+                } else {
+                    Err(ParseError)
+                }
+            }
             Err(e) => Err(e),
         }
     }

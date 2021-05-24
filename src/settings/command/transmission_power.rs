@@ -1,4 +1,4 @@
-use crate::parameter::transmission_power::TransmissionPower;
+use crate::settings::parameter::transmission_power::TransmissionPower;
 
 use super::MakeCommand;
 

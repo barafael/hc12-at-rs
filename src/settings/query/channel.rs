@@ -1,4 +1,4 @@
-use crate::parameter::channel::Channel;
+use crate::settings::parameter::channel::Channel;
 
 use super::MakeQuery;
 

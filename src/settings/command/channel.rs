@@ -1,7 +1,7 @@
 use at_commands::builder::CommandBuilder;
 use core::convert::TryInto;
 
-use crate::parameter::channel::Channel;
+use crate::settings::parameter::channel::Channel;
 
 use super::MakeCommand;
 

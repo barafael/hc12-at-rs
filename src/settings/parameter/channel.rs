@@ -43,7 +43,7 @@ impl Channel {
 
 #[cfg(test)]
 mod test {
-    use crate::parameter::channel::Channel;
+    use crate::settings::parameter::channel::Channel;
 
     #[test]
     fn test_channel_get_freq_default() {

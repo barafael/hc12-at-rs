@@ -1,9 +1,6 @@
-use crate::{
-    parameter::{
+use crate::settings::{parameter::{
         baudrate::BaudRate, channel::Channel, mode::Mode, transmission_power::TransmissionPower,
-    },
-    query::MakeQuery,
-};
+}, query::MakeQuery};
 
 #[test]
 fn query_single_param() {

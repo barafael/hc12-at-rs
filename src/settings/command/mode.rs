@@ -1,4 +1,4 @@
-use crate::parameter::mode::Mode;
+use crate::settings::parameter::mode::Mode;
 
 use super::MakeCommand;
 

@@ -1,4 +1,4 @@
-use crate::parameter::baudrate::BaudRate;
+use crate::settings::parameter::baudrate::BaudRate;
 
 use super::MakeQuery;
 

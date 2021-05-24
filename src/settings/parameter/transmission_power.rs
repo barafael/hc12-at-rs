@@ -82,7 +82,7 @@ impl TransmissionPower {
 mod test {
     use core::convert::TryFrom;
 
-    use crate::parameter::transmission_power::TransmissionPower;
+    use crate::settings::parameter::transmission_power::TransmissionPower;
 
     #[test]
     fn parse_power_from_i32() {

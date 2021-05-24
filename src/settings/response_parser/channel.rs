@@ -2,7 +2,7 @@ use core::convert::TryFrom;
 
 use at_commands::parser::{CommandParser, ParseError};
 
-use crate::parameter::channel::Channel;
+use crate::settings::parameter::channel::Channel;
 
 impl TryFrom<&[u8]> for Channel {
     type Error = ParseError;

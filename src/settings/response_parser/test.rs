@@ -1,6 +1,6 @@
 use core::convert::TryFrom;
 
-use crate::parameter::{
+use crate::settings::parameter::{
     baudrate::BaudRate, channel::Channel, mode::Mode, transmission_power::TransmissionPower,
 };
 
