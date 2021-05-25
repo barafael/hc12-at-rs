@@ -72,7 +72,7 @@ fn usage_from_readme() {
         serial::Transaction::write_many(b"AT+V\r\n"),
         serial::Transaction::read_many(b"VERSION-42\r\n"),
         serial::Transaction::write_many(b"AT+RX\r\n"),
-        serial::Transaction::read_many(b"OK+FU2\r\nOK+B115200\r\nOK+RC042\r\nOK+RP:-1dBm\r\n"),
+        serial::Transaction::read_many(b"OK+B115200\r\nOK+RC042\r\nOK+RP:-1dBm\r\nOK+FU2\r\n"),
         serial::Transaction::write_many(b"some data AT AT\r\n"),
     ];
     let serial = serial::Mock::new(&transactions);
@@ -143,7 +143,7 @@ fn get_parameters() {
     let set_pin = pin::Mock::new(&pin_transactions);
     let transactions = [
         serial::Transaction::write_many(b"AT+RX\r\n"),
-        serial::Transaction::read_many(b"OK+FU3\r\nOK+B9600\r\nOK+RC001\r\nOK+RP:+20dBm\r\n"),
+        serial::Transaction::read_many(b"OK+B9600\r\nOK+RC001\r\nOK+RP:+20dBm\r\nOK+FU3\r\n"),
     ];
     let serial = serial::Mock::new(&transactions);
     let hc12 = Hc12::new(serial, set_pin, delay);
@@ -173,7 +173,7 @@ fn get_more_parameters() {
     let set_pin = pin::Mock::new(&pin_transactions);
     let transactions = [
         serial::Transaction::write_many(b"AT+RX\r\n"),
-        serial::Transaction::read_many(b"OK+FU1\r\nOK+B115200\r\nOK+RC101\r\nOK+RP:-1dBm\r\n"),
+        serial::Transaction::read_many(b"OK+B115200\r\nOK+RC101\r\nOK+RP:-1dBm\r\nOK+FU1\r\n"),
     ];
     let serial = serial::Mock::new(&transactions);
     let hc12 = Hc12::new(serial, set_pin, delay);

@@ -270,10 +270,10 @@ where
                 }
             }
         }
-        let mode = Mode::try_from(param_slices[0]).ok()?;
-        let baud_rate = BaudRate::try_from(param_slices[1]).ok()?;
-        let channel = Channel::try_from(param_slices[2]).ok()?;
-        let power = TransmissionPower::try_from(param_slices[3]).ok()?;
+        let baud_rate = BaudRate::try_from(param_slices[0]).ok()?;
+        let channel = Channel::try_from(param_slices[1]).ok()?;
+        let power = TransmissionPower::try_from(param_slices[2]).ok()?;
+        let mode = Mode::try_from(param_slices[3]).ok()?;
         Some(Parameters {
             baud_rate,
             channel,
