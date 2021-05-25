@@ -28,7 +28,10 @@ fn main() -> Result<(), ()> {
 
     println!("{:?}", params.get_air_baud_rate());
 
-    println!("{:?}", params.get_air_baud_rate().get_wireless_sensitivity_dbm());
+    println!(
+        "{:?}",
+        params.get_air_baud_rate().get_wireless_sensitivity_dbm()
+    );
 
     let mut hc12 = match hc12.into_normal_mode() {
         Ok(r) => r,
