@@ -1,35 +1,48 @@
 use core::convert::TryFrom;
 
+use num_derive::{FromPrimitive, ToPrimitive};
+use num_traits::FromPrimitive;
+
 /// Transmission power
-#[derive(Debug, PartialEq, Eq)]
-pub struct TransmissionPower(u8);
+#[repr(u8)]
+#[derive(Debug, PartialEq, Eq, FromPrimitive, ToPrimitive)]
+pub enum TransmissionPower {
+    /// Power -1 dBm
+    One = 1,
+    /// Power 2 dBm
+    Two = 2,
+    /// Power 5 dBm
+    Three = 3,
+    /// Power 8 dBm
+    Four = 4,
+    /// Power 11 dBm
+    Five = 5,
+    /// Power 14 dBm
+    Six = 6,
+    /// Power 17 dBm
+    Seven = 7,
+    /// Power 20 dBm
+    Eight = 8,
+}
 
 impl TransmissionPower {
     /// Construct a new TransmissionPower, if level given is valid
     pub fn new(p: u8) -> Option<Self> {
-        TransmissionPower::try_from(p as u32).ok()
-    }
-
-    /// Get the power of this parameter
-    pub fn power(&self) -> u8 {
-        self.0
+        TransmissionPower::from_u8(p)
     }
 }
 
 impl Default for TransmissionPower {
     fn default() -> Self {
-        Self(8)
+        Self::Eight
     }
 }
 
-impl TryFrom<u32> for TransmissionPower {
+impl TryFrom<u8> for TransmissionPower {
     type Error = ();
 
-    fn try_from(value: u32) -> Result<Self, Self::Error> {
-        match value {
-            n if n > 0 && n < 9 => Ok(TransmissionPower(n as u8)),
-            _ => Err(()),
-        }
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        Self::try_from(value as i32)
     }
 }
 
@@ -38,14 +51,14 @@ impl TryFrom<i32> for TransmissionPower {
 
     fn try_from(value: i32) -> Result<Self, Self::Error> {
         match value {
-            -1 => Ok(TransmissionPower(1)),
-            2 => Ok(TransmissionPower(2)),
-            5 => Ok(TransmissionPower(3)),
-            8 => Ok(TransmissionPower(4)),
-            11 => Ok(TransmissionPower(5)),
-            14 => Ok(TransmissionPower(6)),
-            17 => Ok(TransmissionPower(7)),
-            20 => Ok(TransmissionPower(8)),
+            -1 => Ok(TransmissionPower::One),
+            2 => Ok(TransmissionPower::Two),
+            5 => Ok(TransmissionPower::Three),
+            8 => Ok(TransmissionPower::Four),
+            11 => Ok(TransmissionPower::Five),
+            14 => Ok(TransmissionPower::Six),
+            17 => Ok(TransmissionPower::Seven),
+            20 => Ok(TransmissionPower::Eight),
             _ => Err(()),
         }
     }
@@ -54,31 +67,29 @@ impl TryFrom<i32> for TransmissionPower {
 impl TransmissionPower {
     /// Get the transmission power in dBm
     pub fn get_power_dbm(&self) -> i8 {
-        match self.0 {
-            1 => -1,
-            2 => 2,
-            3 => 5,
-            4 => 8,
-            5 => 11,
-            6 => 14,
-            7 => 17,
-            8 => 20,
-            _ => unreachable!(),
+        match &self {
+            TransmissionPower::One => -1,
+            TransmissionPower::Two => 2,
+            TransmissionPower::Three => 5,
+            TransmissionPower::Four => 8,
+            TransmissionPower::Five => 11,
+            TransmissionPower::Six => 14,
+            TransmissionPower::Seven => 17,
+            TransmissionPower::Eight => 20,
         }
     }
 
     /// Get the power in milliwatt for this transmission power
     pub fn get_power_milliwatt(&self) -> f32 {
-        match self.0 {
-            1 => 0.79,
-            2 => 1.58,
-            3 => 3.16,
-            4 => 6.31,
-            5 => 12.59,
-            6 => 25.12,
-            7 => 50.12,
-            8 => 100.0,
-            _ => unreachable!(),
+        match &self {
+            TransmissionPower::One => 0.79,
+            TransmissionPower::Two => 1.58,
+            TransmissionPower::Three => 3.16,
+            TransmissionPower::Four => 6.31,
+            TransmissionPower::Five => 12.59,
+            TransmissionPower::Six => 25.12,
+            TransmissionPower::Seven => 50.12,
+            TransmissionPower::Eight => 100.0,
         }
     }
 }

@@ -156,7 +156,7 @@ fn get_parameters() {
     let expected = Parameters {
         baud_rate: BaudRate::Bps9600,
         channel: Channel::new(1).unwrap(),
-        power: TransmissionPower::new(8).unwrap(),
+        power: TransmissionPower::Eight,
         mode: Mode::Fu3,
     };
     assert_eq!(expected, params);
