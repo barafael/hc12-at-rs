@@ -1,5 +1,7 @@
 # hc12
 
+![No Std][no-std-badge]
+
 Driver for the hc-12 radio transceiver serial module.
 
 This module can be configured using AT commands while the SET pin is pulled low. This driver takes an OutputPin, Serial Port and DelayMs from embedded-hal and offers a somewhat convenient interface to interact with the hc12 module.
@@ -41,3 +43,6 @@ let (mut serial, mut set_pin, _) = hc12.release();
 ```
 
 (^: see hc12::test::usage_from_readme)
+
+<!-- Badges -->
+[no-std-badge]: https://img.shields.io/badge/no__std-yes-blue
