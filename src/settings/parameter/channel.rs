@@ -14,10 +14,12 @@ impl TryFrom<u8> for Channel {
     }
 }
 
+/// Communication channel
 #[derive(Debug, ToPrimitive, FromPrimitive, PartialEq, Eq)]
 pub struct Channel(u8);
 
 impl Channel {
+    /// Construct a new Channel, if the given channel is valid
     pub fn new(ch: u8) -> Option<Self> {
         Self::try_from(ch).ok()
     }
@@ -30,12 +32,14 @@ impl Default for Channel {
 }
 
 impl Channel {
+    /// Get the frequency of the channel in MHz
     pub fn get_freq_mhz(&self) -> f32 {
         433.0 + self.0 as f32 * 0.4
     }
 
-    pub fn set_channel(&mut self, ch: u8) -> Result<(), ()> {
-        let ch = Channel::try_from(ch)?;
+    /// Get the channel value
+    pub fn set_channel(&mut self, ch: u8) -> Result<(), crate::Error> {
+        let ch = Channel::try_from(ch).map_err(|_| crate::Error::InvalidChannel)?;
         self.0 = ch.0;
         Ok(())
     }

@@ -1,13 +1,16 @@
 use core::convert::TryFrom;
 
+/// Transmission power
 #[derive(Debug, PartialEq, Eq)]
 pub struct TransmissionPower(u8);
 
 impl TransmissionPower {
+    /// Construct a new TransmissionPower, if level given is valid
     pub fn new(p: u8) -> Option<Self> {
         TransmissionPower::try_from(p as u32).ok()
     }
 
+    /// Get the power of this parameter
     pub fn power(&self) -> u8 {
         self.0
     }
@@ -49,6 +52,7 @@ impl TryFrom<i32> for TransmissionPower {
 }
 
 impl TransmissionPower {
+    /// Get the transmission power in dBm
     pub fn get_power_dbm(&self) -> i8 {
         match self.0 {
             1 => -1,
@@ -63,6 +67,7 @@ impl TransmissionPower {
         }
     }
 
+    /// Get the power in milliwatt for this transmission power
     pub fn get_power_milliwatt(&self) -> f32 {
         match self.0 {
             1 => 0.79,

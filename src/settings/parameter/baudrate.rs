@@ -6,25 +6,40 @@ use num_derive::{FromPrimitive, ToPrimitive};
 
 use super::{mode::Mode, parameters::Parameters};
 
+/// Baud rate of HC-12
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum BaudRate {
+    /// 1200 bauds per second
     Bps1200 = 1200,
+    /// 2400 bauds per second
     Bps2400 = 2400,
+    /// 4800 bauds per second
     Bps4800 = 4800,
+    /// 9600 bauds per second
     Bps9600 = 9600,
+    /// 19200 bauds per second
     Bps19200 = 19200,
+    /// 38400 bauds per second
     Bps38400 = 38400,
+    /// 57600 bauds per second
     Bps57600 = 57600,
+    /// 115200 bauds per second
     Bps115200 = 115200,
 }
 
+/// Baud rate in the air
 #[derive(Debug, Eq, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum AirBaudRate {
+    /// 5000 bauds per second
     Bps5000 = 5000,
+    /// 15000 bauds per second
     Bps15000 = 15000,
+    /// 58000 bauds per second
     Bps58000 = 58000,
+    /// 236000 bauds per second
     Bps236000 = 236000,
+    /// 250000 bauds per second
     Bps250000 = 250000,
 }
 
@@ -52,14 +67,9 @@ impl TryFrom<i32> for BaudRate {
     }
 }
 
-pub trait BaudRateParameter {
-    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error>;
-    fn get_baud_rate(&self) -> BaudRate;
-    fn get_air_baud_rate(&self) -> AirBaudRate;
-}
-
-impl BaudRateParameter for Parameters {
-    fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
+impl Parameters {
+    /// Set the baud rate of the parameters
+    pub fn set_baud_rate(&mut self, rate: BaudRate) -> Result<(), Error> {
         match self.mode {
             Mode::Fu1 => {
                 self.baud_rate = rate;
@@ -82,7 +92,8 @@ impl BaudRateParameter for Parameters {
         }
     }
 
-    fn get_air_baud_rate(&self) -> AirBaudRate {
+    /// Try to get the (depends on serial baud rate + info from datasheet)
+    pub fn get_air_baud_rate(&self) -> AirBaudRate {
         match self.mode {
             Mode::Fu1 => AirBaudRate::Bps250000,
             Mode::Fu2 => AirBaudRate::Bps250000,
@@ -101,13 +112,10 @@ impl BaudRateParameter for Parameters {
             }
         }
     }
-
-    fn get_baud_rate(&self) -> BaudRate {
-        self.baud_rate
-    }
 }
 
 impl AirBaudRate {
+    /// Get the wireless sensitivity in dbm of this air baud rate
     pub fn get_wireless_sensitivity_dbm(&self) -> i32 {
         match self {
             AirBaudRate::Bps5000 => -117,
@@ -124,7 +132,7 @@ mod test {
     use core::convert::TryFrom;
 
     use crate::settings::parameter::{
-        baudrate::{AirBaudRate, BaudRate, BaudRateParameter},
+        baudrate::{AirBaudRate, BaudRate},
         mode::Mode,
         parameters::Parameters,
         transmission_power::TransmissionPower,

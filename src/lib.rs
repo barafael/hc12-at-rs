@@ -20,4 +20,6 @@ pub enum Error {
     Write,
     /// Invalid baud rate
     InvalidBaudRate,
+    /// Invalid channel error
+    InvalidChannel,
 }

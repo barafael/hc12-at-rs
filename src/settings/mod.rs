@@ -1,5 +1,5 @@
 /// Configuration data structures
-pub(crate) mod parameter;
+pub mod parameter;
 
 /// Command datastructures
 pub mod command;
