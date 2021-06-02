@@ -1,0 +1,17 @@
+[package]
+name = "longan-nano-hc12"
+version = "0.1.0"
+authors = ["Rafael Bachmann <rafael.bachmann.93@gmail.de>"]
+edition = "2018"
+
+[dependencies]
+gd32vf103xx-hal = "0.4.0"
+embedded-hal = "0.2.5"
+nb = "1.0.0"
+riscv = "0.6.0"
+riscv-rt = "0.8.0"
+panic-halt = "0.2.0"
+heapless = "0.7.0"
+
+[dependencies.hc12-at]
+path = "../hc12-at"
