@@ -1,6 +1,0 @@
-[workspace]
-
-members = [
-    "hc12-at",
-    "hc12-example-raspi",
-]
