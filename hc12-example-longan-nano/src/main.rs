@@ -2,16 +2,15 @@
 #![no_main]
 
 use embedded_hal::digital::v2::OutputPin;
+use hc12_at::hc12::Hc12;
 use panic_halt as _;
 
 use gd32vf103xx_hal::serial::Serial;
 use gd32vf103xx_hal::{pac, prelude::*, serial::Config, time::Bps};
 
+use debugless_unwrap::DebuglessUnwrap;
+
 use riscv_rt::entry;
-
-use nb::block;
-
-use hc12_at::*;
 
 struct MySerial<TX, RX> {
     tx: TX,
@@ -53,12 +52,10 @@ fn main() -> ! {
 
     let gpioa = dp.GPIOA.split(&mut rcu);
     let gpiob = dp.GPIOB.split(&mut rcu);
-    let gpioc = dp.GPIOC.split(&mut rcu);
 
     let mut led = gpioa.pa2.into_open_drain_output();
 
     let mut delay = gd32vf103xx_hal::delay::McycleDelay::new(&rcu.clocks);
-    let mut delay1 = delay.clone();
 
     let set_pin = gpiob.pb1.into_open_drain_output();
     let config = Config::default().baudrate(Bps(9600));
@@ -75,16 +72,16 @@ fn main() -> ! {
         rx: serial.1,
     };
 
-    let mut hc12 = hc12_at::hc12::Hc12::new(ms, set_pin, delay1);
+    let mut hc12 = Hc12::new(ms, set_pin, delay);
 
     loop {
-        hc12.write_buffer(b"Hello World");
-        hc12.write(b'\r');
-        hc12.write(b'\n');
-        hc12.flush();
-        led.set_low();
+        hc12.write_buffer(b"Hello World").debugless_unwrap();
+        hc12.write(b'\r').debugless_unwrap();
+        hc12.write(b'\n').debugless_unwrap();
+        hc12.flush().debugless_unwrap();
+        led.set_low().debugless_unwrap();
         delay.delay_ms(250);
-        led.set_high();
+        led.set_high().debugless_unwrap();
         delay.delay_ms(250);
     }
 }
