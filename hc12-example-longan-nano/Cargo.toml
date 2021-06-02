@@ -3,6 +3,7 @@ name = "longan-nano-hc12"
 version = "0.1.0"
 authors = ["Rafael Bachmann <rafael.bachmann.93@gmail.de>"]
 edition = "2018"
+resolver = "2"
 
 [dependencies]
 gd32vf103xx-hal = "0.4.0"
