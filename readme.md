@@ -1,4 +1,4 @@
-# Rust embedded-hal driver for hc12-rs
+# Rust embedded-hal driver for hc12 radio module
 
 [![.github/workflows/rust.yml](https://github.com/barafael/hc12-at-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/barafael/hc12-at-rs/actions/workflows/rust.yml)
 
