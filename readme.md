@@ -5,3 +5,6 @@
 Driver for the hc-12 radio transceiver serial module.
 
 For driver, see hc12-at/. For example running on raspberry pi, see hc12-example-raspi/.
+
+## Blog post
+https://barafael.github.io/A-Platform-Agnostic-Driver-for-the-HC12-serial-radio-module/
