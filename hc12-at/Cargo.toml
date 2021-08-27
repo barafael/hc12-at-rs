@@ -3,7 +3,7 @@ authors = ["Rafael Bachmann <rafael.bachmann.93@gmail.com>"]
 description = "An embedded-hal driver for the HC-12 serial transceiver module."
 edition = "2018"
 name = "hc12-at"
-version = "0.1.0"
+version = "0.2.0"
 license-file = "LICENSE"
 repository = "https://github.com/barafael/hc12-at-rs"
 
