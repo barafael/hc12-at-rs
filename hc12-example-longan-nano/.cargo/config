@@ -3,7 +3,16 @@ runner = 'riscv64-unknown-elf-gdb -x openocd.gdb'
 rustflags = [
   "-C", "link-arg=-Tmemory-cb.x",
   "-C", "link-arg=-Tlink.x",
+  "-C",  "linker=lld"
 ]
 
 [build]
 target = "riscv32imac-unknown-none-elf"
+
+[profile.release]
+opt-level = "z"  # Optimize for size.
+codegen-units = 1
+lto = true
+
+[profile.dev]
+opt-level = "z"  # Optimize for size.
