@@ -29,7 +29,7 @@ impl From<&Channel> for [u8; 3] {
             }
             for i in buf.iter_mut() {
                 if n > 0 {
-                    *i = (n % 10) as u8 + b'0';
+                    *i = (n % 10) + b'0';
                     n /= 10;
                 } else {
                     *i = b"0"[0];

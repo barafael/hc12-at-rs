@@ -8,45 +8,52 @@ use super::{mode::Mode, parameters::Parameters};
 
 /// Baud rate of HC-12
 #[repr(u32)]
-#[derive(Debug, Copy, Clone, Eq, PartialEq, FromPrimitive, ToPrimitive)]
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum BaudRate {
     /// 1200 bauds per second
     Bps1200 = 1200,
+
     /// 2400 bauds per second
     Bps2400 = 2400,
+
     /// 4800 bauds per second
     Bps4800 = 4800,
+
+    #[default]
     /// 9600 bauds per second
     Bps9600 = 9600,
+
     /// 19200 bauds per second
     Bps19200 = 19200,
+
     /// 38400 bauds per second
     Bps38400 = 38400,
+
     /// 57600 bauds per second
     Bps57600 = 57600,
+
     /// 115200 bauds per second
     Bps115200 = 115200,
 }
 
 /// Baud rate in the air
+#[repr(u32)]
 #[derive(Debug, Eq, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum AirBaudRate {
     /// 5000 bauds per second
     Bps5000 = 5000,
+
     /// 15000 bauds per second
     Bps15000 = 15000,
+
     /// 58000 bauds per second
     Bps58000 = 58000,
+
     /// 236000 bauds per second
     Bps236000 = 236000,
+
     /// 250000 bauds per second
     Bps250000 = 250000,
-}
-
-impl Default for BaudRate {
-    fn default() -> Self {
-        BaudRate::Bps9600
-    }
 }
 
 impl TryFrom<i32> for BaudRate {

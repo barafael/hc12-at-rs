@@ -15,6 +15,6 @@ impl TryFrom<&[u8]> for Channel {
             .finish()
             .unwrap();
         let byte: u8 = result.0 as u8;
-        Channel::try_from(byte).map_err(|_| ParseError)
+        Ok(Channel::try_from(byte).unwrap())
     }
 }

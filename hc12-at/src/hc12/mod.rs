@@ -50,7 +50,7 @@ pub struct Hc12<S, P, D, M>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
-    D: DelayMs<u32>,
+    D: DelayMs<u16>,
 {
     serial: S,
     set_pin: P,
@@ -63,7 +63,7 @@ impl<S, P, D> Hc12<S, P, D, Normal>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
-    D: DelayMs<u32>,
+    D: DelayMs<u16>,
 {
     /// Construct an Hc12 in normal mode
     pub fn new(serial: S, mut set_pin: P, mut delay: D) -> Self {
@@ -123,7 +123,7 @@ impl<S, P, D> embedded_hal::serial::Read<u8> for Hc12<S, P, D, Normal>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
-    D: DelayMs<u32>,
+    D: DelayMs<u16>,
 {
     type Error = <S as Read<u8>>::Error;
 
@@ -138,7 +138,7 @@ impl<S, P, D> embedded_hal::serial::Write<u8> for Hc12<S, P, D, Normal>
 where
     S: embedded_hal::serial::Read<u8> + embedded_hal::serial::Write<u8>,
     P: OutputPin,
-    D: DelayMs<u32>,
+    D: DelayMs<u16>,
 {
     type Error = <S as Write<u8>>::Error;
     fn write(&mut self, word: u8) -> nb::Result<(), Self::Error> {
@@ -155,7 +155,7 @@ impl<S, P, D> Hc12<S, P, D, Configuration>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
-    D: DelayMs<u32>,
+    D: DelayMs<u16>,
 {
     /// Move Hc12 in config mode back to normal mode.
     pub fn into_normal_mode(mut self) -> ConfigToNormal<S, P, D> {
@@ -288,7 +288,7 @@ impl<S, P, D> Hc12<S, P, D, Sleep>
 where
     S: Read<u8> + Write<u8>,
     P: OutputPin,
-    D: DelayMs<u32>,
+    D: DelayMs<u16>,
 {
     /// Move Hc12 in sleeping mode back to configuration mode.
     pub fn into_configuration_mode(mut self) -> SleepToConfig<S, P, D> {
